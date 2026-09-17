@@ -41,7 +41,7 @@ epic: ""
 | 常见固件 | QGC 在线刷写：`FirmwareUpgradeController.cc` 显示 QGC 连接 bootloader 读出 board ID，经 `px4_board_name_map`（约 60 板型映射，源自 PX4-Bootloader `board_types.txt`）映射后从 `px4-travis.s3.amazonaws.com/Firmware/{stable|beta|master}/` 下载；PIX 2.4.8 克隆板对应 board ID 9 → `px4_fmu-v2_default` |
 | PIX 调参软件 | 即 QGC 本身；`references/qgroundcontrol/docs/{en,zh}/qgc-user-guide/setup_view/tuning_px4.md` 及配套设置文档全套覆盖 |
 
-**验证**：PX4 官方文档 `firmware.md` 与 QGC 源码一致；QGC 用户指南在本仓 `references/qgroundcontrol/docs/` 有中英双语源码。
+**验证**：QGC 已安装于 `U:\expro\QGroundControl\bin\QGroundControl.exe`（v5.0.3-1388 master 构建，`--version` 确认可运行）；PX4 官方文档 `firmware.md` 与 QGC 源码一致；QGC 用户指南在本仓 `references/qgroundcontrol/docs/` 有中英双语源码。
 
 **回写**：`.cs/notes/001-入门资源索引.md` 已更新（失效小节替换为官方渠道说明）；`.cs/notes/002-PX4本地文档查阅.md` 补充 QGC 仓库同样自带完整文档；`.cs/spec/index.md` 已更新当前状态与证据索引。
 
