@@ -1,0 +1,75 @@
+# references/ 仓库索引
+
+## 结论
+
+`references/` 目前共 **13 个官方仓库 clone**（全部经 ghfast.top 镜像自 github.com，工作区干净、无本地改动）。按用途分四组：
+
+| 分组 | 仓库 | 一句话用途 |
+|---|---|---|
+| **核心栈**（已收录于 notes/001–002） | `PX4-Autopilot` | PX4 固件源码 + 官方文档源（docs.px4.io 渲染源） |
+| | `qgroundcontrol` | QGC 源码 + 用户/开发者指南全文 |
+| **ROS 2 / 伴飞电脑桥接** | `px4_msgs` | PX4 uORB → ROS 2 `.msg`/`.srv` 接口定义（版本号跟随 PX4 发布线） |
+| | `px4_ros_com` | PX4↔ROS 2 示例节点 + 坐标系转换库（offboard 控制示例） |
+| | `Micro-XRCE-DDS-Agent` | eProsima uXRCE-DDS Agent：PX4 `uxrce_dds_client` 对接 DDS 的**现行**桥（v3.0.2） |
+| | `micrortps_agent` | **旧** microRTPS 桥 agent 端（FastRTPS/FastDDS 时代），已被 uXRCE-DDS 取代，存档参考 |
+| **日志分析** | `pyulog` | ULog 解析库 + 命令行工具（ulog_info/2csv/2kml/2rosbag），可 `pip install` |
+| | `flight_review` | review.px4.io 同款 Web 日志分析站（Tornado+Bokeh，依赖 pyulog） |
+| | `PlotJuggler` | 时间序列可视化工具（PX4 fork，可加载 ULog/流数据，v3.9.3+） |
+| **构建 / 底层 / 文档归档** | `PX4-Bootloader` | STM32F1/F3/F4/F7 旧式 bootloader + 权威 `board_types.txt`（board ID 表） |
+| | `PX4-containers` | 官方 `px4io/px4-dev-*` Docker 镜像的 Dockerfile 层级 |
+| | `PX4-windows-toolchain` | Windows Cygwin 工具链 MSI 打包工程（WiX；**2021 停更**，官方已转向 WSL2/Docker） |
+| | `PX4-user_guide` | **[已归档]** 旧文档仓库，README 明确内容已并入 `PX4-Autopilot/docs`；本地仅作历史快照 |
+
+## 触发场景
+
+- 想查某个 `references/` 仓库是干什么的、现在还活不活跃、对当前任务有没有用
+- 做 ROS 2 / 多机 / offboard 时确认本地已有哪几环桥接件、版本是否对齐
+- 日志分析、仿真 Docker、刷机 bootloader 板型核查时定位对应仓库
+- 清理/同步 `references/` 时判断哪些可删、哪些是只读快照
+
+## 证据和细节
+
+### 当前本地快照版本（`git describe` / HEAD 时间）
+
+- `PX4-Autopilot` — `v1.18.0-beta1-687`（main，2026-09-16）；项目版本基线 **v1.13.3** 以 tag 存在
+- `qgroundcontrol` — `v5.0.3-1391`（master，2026-09-16）
+- `Micro-XRCE-DDS-Agent` — `v3.0.2`（2026-09-03）
+- `px4_msgs` — main（2026-09-16，同步 PX4 `75cb93a7`）；tag 到 `v1.17.0`
+- `px4_ros_com` — `beta-384-g86e9aeb`（main，2024-03-10，**近两年未更新**）
+- `PlotJuggler` — `3.9.3-18`（PX4 fork，2025-03-19）
+- `flight_review` — 无 tag（main，2026-08-18）
+- `pyulog` — `v1.2.4`（2026-08-06）
+- `PX4-Bootloader` — `v5.0-314`（2026-09-07）
+- `PX4-containers` — `2025-02-10`（2025-02-12，含 Noble）
+- `PX4-windows-toolchain` — `v1.0-1`（**2021-03-14，停更**）
+- `PX4-user_guide` — 无 tag（main，2026-04-18 自动同步，**已归档只读**）
+
+### 与版本基线（v1.13.x）/ 板型（fmu-v2）的适配关系
+
+- **ROS 2 桥接与 fmu-v2 不匹配**：`px4_msgs`/`px4_ros_com`/`Micro-XRCE-DDS-Agent` 走的是 uXRCE-DDS（`uxrce_dds_client` 模块）。该模块默认 `default n`，且需启用板自行打开——fmu-v2（2.4.8，`CONSTRAINED_FLASH/MEMORY=y`）所有变体在 v1.13.3 与 main 上**均未启用** RTPS/DDS 客户端。官方在 v1.13 给 RTPS 出 `rtps.px4board` 变体的板均为 fmu-v5/v5x/fmuk66/pixracerpro 等更大 flash 板。→ 2.4.8 实机暂不能走 DDS/ROS 2；多机/offboard 若需 ROS 2，须换受支持板或走 MAVLink。
+- **`micrortps_agent` 是遗产**：对应 PX4 `micrortps_bridge`（v1.13 尚存、main 已移除），配合旧 `micrortps_client`。仅存档参考；新工作用 uXRCE-DDS 一组。
+- **`px4_msgs` 版本号 = PX4 发布线**：头文件注明由 PX4-Autopilot uORB 定义自动同步；查消息定义时注意 tag（本地 HEAD 对齐 v1.17，与 v1.13 基线有差异）。
+
+### 日志分析链（单机调试直接可用）
+
+`pyulog`（解析）→ `flight_review`（自建 Web 分析，review.px4.io 同源）/ `PlotJuggler`（本地拖拽绘图）。QGC 本身也可一键上传日志到 review.px4.io；本地 clone 用于离线/私有化分析与理解 ULog 字段。
+
+### 构建与底层
+
+- `PX4-containers`：`docker/` 下 Dockerfile 层级（base → nuttx → simulation → ros/ros2），README 列完整镜像族谱与 `docker run` 用法；配合 `PX4-Autopilot/Tools/docker_run.sh` 在 Windows 上跑编译/SITL。
+- `PX4-Bootloader`：`board_types.txt` 是 QGC `px4_board_name_map` 与刷机 board ID 判定的**权威来源**（issue 001 已用它核对 2.4.8→board ID 9→`px4_fmu-v2_default`）。
+- `PX4-windows-toolchain`：Cygwin+gcc-arm+jdk+ant 的 MSI 打包工程，2021 停更——官方 Windows 构建已迁 WSL2/Docker；仅历史参考，不作为新装机路径。
+
+### 规模与同步
+
+- 体积：`PX4-user_guide` 1.1G、`PX4-Autopilot` 987M、`qgroundcontrol` 682M、`flight_review` 91M、`PlotJuggler` 72M，其余 ≤19M。
+- 全部 remote 走 `ghfast.top` 镜像；`git pull` 即同步（详见 notes/002 更新方式）。
+- 子模块：`PX4-Autopilot` 的仿真器等为 `-` 未初始化状态（SITL 需先 `git submodule update` 对应子模块，见 issue 004）。
+
+## 相关位置
+
+- `.cs/notes/001-入门资源索引.md` — 教程与官方下载渠道
+- `.cs/notes/002-PX4本地文档查阅.md` — `PX4-Autopilot`/`qgroundcontrol` 两仓的离线文档用法
+- `.cs/issues/001-x-找回调参与QGC资源.md` — 用 `PX4-Bootloader/board_types.txt` 核对板型映射的实例
+- `.cs/spec/index.md` — 版本基线 v1.13.x 与"官方为权威"原则
+- `.cs/issues/004`/`005` — SITL 与多机/ROS 2 检索，直接消费本索引中的桥接与容器仓
