@@ -164,6 +164,17 @@
 - M1：WSL、Ubuntu、工具链、容器缓存及子模块检查，完整证据和命令见 `03-simulation-assessment.md`。
 - M1为本轮环境检查的复核记录，不是飞行实验或性能测试；第10页来源写“本机环境检查”，不写“PX4官方结论”。
 
+### M1b 仿真结果实测（2026-09-22 解冻后新增）
+
+- M1 从“预检”扩为“预检 + 仿真结果”。本机实测跑通 PX4 SITL 闭环，证据本机留存：
+  - `.cs/evidence/sitl/gazebo_hover.png`：Gazebo GUI 实测截图（iris 在 empty.world，WSLg 渲染到 Windows 桌面）。
+  - `.cs/evidence/sitl/flight_loop_12_09_45.ulg`、`flight_loop_12_13_56.ulg`：起飞→降落→上锁完整飞行日志。
+  - `.cs/evidence/sitl/sitl_console.log`：pxh 控制台输出（`Takeoff detected`/`Landing detected`/`Disarmed by landing`）。
+- 版本锚点：PX4 **v1.13.3**（`1c8ab2a0d7…`）、Gazebo Classic **11.15.1**、WSL2 Ubuntu-20.04.6。
+- 启动方式：`make px4_sitl gazebo`（`/root/px4-sitl-src` worktree 副本）。
+- 可讲：本机实测 SITL 能跑，闭环起飞降落成功，截图/ULog 为本机结果。
+- 不可讲：仿真结果 ≠ 实机结果；不证明实机接线/校准/动力；QGC 连通为可选项未实测。截图标注“本机 SITL 仿真（v1.13.3 + Gazebo 11）”，与官方示例图区分。
+
 ## 图片：已实际读图的四张候选
 
 图片由本地读取请求与会话随后呈现的四张图逐张核验。读取工具的文本包装曾显示“0 bytes”，不能据此认定原文件为空；视觉结论来自实际呈现图像。后续制作应从以下原始路径取图。

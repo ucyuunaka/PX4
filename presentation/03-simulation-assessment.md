@@ -64,11 +64,13 @@
 
 即使不依赖外部三维仿真器，仍需匹配可用PX4构建与依赖。它也不能消除当前子模块/编译缺口，且不能把当前main的便利直接写成v1.13能力，因此不临时改道。
 
-## 最终PPT第10页的固定表述
+## 最终PPT第10页的固定表述（首轮结论，已被重新评估取代）
 
 > 本机已具备WSL2与Ubuntu 20.04，但当前默认环境缺少关键构建/仿真工具，参考仓库子模块未初始化。本次以一小时内形成可展示、可复现证据为门槛，不临时搭建仿真栈。仿真实验移至后续，当前只给出最小验证设计。
 
 页面状态必须为“完成环境预检，未执行SITL飞行实验”。不放外部运行画面冒充本机结果。
+
+> 注：以上为**首轮一小时门控**下的第10页表述。2026-09-22 重新评估后 SITL 已实测跑通（见下节），第10页改按真实结果呈现；本段仅作首轮决策留档。
 
 ## 复核命令
 
@@ -89,3 +91,41 @@ docker image ls --format '{{.Repository}}:{{.Tag}} {{.Size}}'
 ## 重新评估条件
 
 组会后，或用户另行提供已经配好的运行目录/镜像时，再开展独立环境搭建任务。需要允许安装依赖和准备匹配版本，并将环境准备与一小时飞行演示分开计时。当前最终内容稿不依赖这项任务完成。
+
+---
+
+## 重新评估（2026-09-22 执行，环境联网已放宽）
+
+上文预检结论（"一小时门控内不进入仿真"）在其时限假设下仍成立；本节的"重新评估条件"已被满足——截止日延至 260929、环境搭建允许联网。重新执行结果如下。
+
+### 本周动作
+
+- 用 `git worktree` 检出 **v1.13.3** 到独立目录（不动主 v1.18 checkout），rsync 到 WSL 原生 ext4（`/root/px4-sitl-src`）避开 `/mnt` 9P 慢。
+- 按 `ghfast.top` 镜像初始化全部所需子模块（含递归：`sitl_gazebo→OpticalFlow→klt_feature_tracker`、`jMAVSim→jMAVlib`、`mavlink→pymavlink`）。
+- WSL 原生 apt 装齐依赖：cmake/ninja/gcc-9、openjdk-13+ant、`gazebo11 + libgazebo11-dev 11.15.1`、`empy==3.3.4`。
+- `make px4_sitl_default` 编译通过（`[837/837]`，0 错误，二进制 47 MB）。
+- `make px4_sitl gazebo` 拉起 `gzserver` + `gzclient`（WSLg 显示到 Windows 桌面）+ `px4`。
+
+### 决策点（go/no-go）
+
+**go**——拿到完整闭环证据。`pxh>` 控制台 `commander takeoff` → `Takeoff detected` → `commander land` → `Landing detected` → `Disarmed by landing`，ULog 落盘。
+
+### 最终结论
+
+- **能跑**：PX4 v1.13.3 + Gazebo Classic 11.15.1 + iris + empty.world，WSL2 Ubuntu-20.04 原生。
+- **闭环证据**：`.cs/evidence/sitl/` 下 `flight_loop_12_09_45.ulg`、`flight_loop_12_13_56.ulg`、`sitl_console.log`、`gazebo_hover.png`。
+- **演示方式**：Gazebo GUI 走 WSLg，Windows 截屏/录屏直接可用；飞行数据有 ULog。
+- **遗留说明**：飞行中出现 `Failsafe enabled: no RC and no datalink`（无遥控器/地面站的预期告警），已通过置参（`NAV_DLL_ACT=0` 等）抑制；QGC 连通为可选加分项，不阻塞结论。
+- 详细命令链、踩坑与复现步骤见 `.cs/notes/004-PX4仿真SITL路径.md`。
+
+### 复核命令（实测路径）
+
+```bash
+# WSL Ubuntu-20.04，源码副本 /root/px4-sitl-src（v1.13.3）
+cd /root/px4-sitl-src
+GIT_SUBMODULES_ARE_EVIL=1 make px4_sitl gazebo   # 起仿真（需保持 stdin 非 EOF，见 notes/004）
+# pxh> 控制台内：
+commander takeoff
+commander land
+# ULog: build/px4_sitl_default/tmp/rootfs/log/<date>/*.ulg
+```

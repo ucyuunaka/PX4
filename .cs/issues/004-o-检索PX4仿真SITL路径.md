@@ -2,7 +2,7 @@
 kind: issue
 title: "检索：PX4 仿真（SITL）路径与本机可行性"
 type: chore
-status: open
+status: done
 created: 2026-09-17
 epic: ".cs/epics/001-o-组会PPT与PX4资料搜集/spec.md"
 ---
@@ -45,7 +45,11 @@ epic: ".cs/epics/001-o-组会PPT与PX4资料搜集/spec.md"
 
 - 给出明确"能跑/不能跑"结论；能跑则附可复现命令与演示路径。
 
+## 结论（2026-09-22 实测）
+
+**能跑**。仿真器 = Gazebo Classic 11.15.1，命令 `make px4_sitl gazebo`（v1.13.3 worktree 副本 `/root/px4-sitl-src`，WSL2 Ubuntu-20.04 原生）。已跑通 `commander takeoff` → `Landing detected` → `Disarmed by landing` 完整闭环，ULog 与截图在 `.cs/evidence/sitl/`。细节与复现命令见 `.cs/notes/004-PX4仿真SITL路径.md`。
+
 ## 关闭回写
 
-- notes：`.cs/notes/004-PX4仿真SITL路径.md`
-- epic spec：勾掉对应 issue；若不能跑，更新"剩余阻碍"与 PPT 演示策略
+- notes：`.cs/notes/004-PX4仿真SITL路径.md`（已产出）
+- epic spec：勾掉对应 issue；若不能跑，更新"剩余阻碍"与 PPT 演示策略 → **已跑通**，剩余阻碍更新见 epic 与 `presentation/03` 重新评估小节。

@@ -1,0 +1,74 @@
+# 004 — PX4 仿真（SITL）路径与本机可行性
+
+结论先行：**本机能跑**。仿真器定为 **Gazebo Classic 11**（v1.13 标配），在 WSL2 `Ubuntu-20.04` 原生编译并跑通了"连接 → 起飞 → 悬停 → 降落 → 上锁"完整闭环。证据见文末。
+
+## 一、确定结论（issue 004 要求的三问）
+
+| 问题 | 答案 |
+|---|---|
+| 能跑吗 | **能跑**（go/no-go = go） |
+| 用哪个仿真器 | **Gazebo Classic 11**（`make px4_sitl gazebo`，iris 机型，empty.world） |
+| 怎么起 | WSL 原生 `make px4_sitl gazebo`（worktree 副本 `/root/px4-sitl-src`） |
+| 怎么录 | Gazebo GUI 走 WSLg 显示到 Windows 桌面（窗口名 `Gazebo (Ubuntu-20.04)`），用系统截图/录屏工具抓该窗口；飞行数据落 ULog |
+
+## 二、版本与启动方式（实测）
+
+- **PX4 版本**：v1.13.3（`git worktree` 独立检出，HEAD `1c8ab2a0d7…`，不动主 checkout v1.18）。
+- **仿真器**：Gazebo Classic **11.15.1**（`libgazebo11-dev`，focal 官方源），非新版 Gazebo（Ignition）。
+- **机型/世界**：`iris` + `empty.world`。
+- **启动命令**（WSL 内）：
+  ```
+  cd /root/px4-sitl-src
+  GIT_SUBMODULES_ARE_EVIL=1 make px4_sitl gazebo
+  ```
+  该目标先编 `build_gazebo` 下的 sitl_gazebo 插件，再由 `Tools/sitl_run.sh` 拉起 `gzserver` + `gzclient` + `px4` 二进制。
+
+## 三、实测跑通的闭环（本次采证）
+
+- `pxh>` 控制台注入 `commander takeoff` → `Takeoff detected` → `commander land` → `Landing at current position` → `Landing detected` → `Disarmed by landing`。
+- 完整日志 `INFO` 序列在 `.cs/evidence/sitl/sitl_console.log`。
+- 期间出现 `WARN [commander] Failsafe enabled: no RC and no datalink`（无遥控器/地面站时的预期告警），已通过置参 `NAV_DLL_ACT=0`、`NAV_RCL_ACT=0`、`COM_LOW_BAT_ACT=0`、`COM_RCL_EXCEPT=4` 让其不强制 RTL，仍可正常起飞降落。
+
+## 四、本机环境前提（已验证）
+
+- WSL2 `Ubuntu-20.04.6 LTS`，内核 6.6.x，`nproc=16`、内存 15Gi；默认用户 root，`sudo -n` 免密。
+- WSLg 可用：`DISPLAY=:0`、`WAYLAND_DISPLAY=wayland-0` → Gazebo GUI 直接显示到 Windows 桌面，无需额外 X server。
+- 关键依赖：`gazebo11 + libgazebo11-dev`、cmake/ninja/gcc-9、openjdk-13+ant（jmavsim 备用）、`empy==3.3.4`（**必须钉 3.3.x**，4.x 删了 `em.RAW_OPT` 会让 mavlink 代码生成炸）。
+- 子模块走 `ghfast.top` 镜像（github 直连超时）。
+
+## 五、QGC 连通（两条候选，先通者为准）
+
+- (a) Windows `U:\expro\QGroundControl\bin\QGroundControl.exe`（v5.0.3）经 UDP 连 WSL IP——注意 WSL2 NAT 不通广播，需 SITL 端 `MAV_BROADCAST=1` 或在 QGC 手动加 Comm Link 指向 WSL IP:14550。
+- (b) WSL 内跑 QGC AppImage 走 WSLg。
+- 备注：本次闭环用 `pxh>` 内置控制台完成（无需 QGC 即可演示起飞-降落）；QGC 连通属"锦上添花"的可视化项，不阻塞结论。
+
+## 六、证据清单（本机实测，非官方截图）
+
+- `.cs/evidence/sitl/flight_loop_12_09_45.ulg` — 完整起飞-降落-上锁飞行日志（44 MB）
+- `.cs/evidence/sitl/flight_loop_12_13_56.ulg` — 第二次复飞日志（10 MB）
+- `.cs/evidence/sitl/sitl_console.log` — pxh 控制台输出（含 Takeoff/Landing/Disarmed 序列）
+- `.cs/evidence/sitl/gazebo_hover.png` — Gazebo GUI 截图（WSLg 渲染到 Windows 桌面）
+
+## 七、复现步骤（精简）
+
+```bash
+# WSL Ubuntu-20.04
+cd /root/px4-sitl-src                      # v1.13.3 worktree 副本
+GIT_SUBMODULES_ARE_EVIL=1 make px4_sitl gazebo   # 编插件 + 起仿真
+# pxh> 内：
+commander takeoff
+commander land
+# ULog 落在 build/px4_sitl_default/tmp/rootfs/log/<date>/
+```
+
+## 八、坑位备忘（排错已解决，勿再踩）
+
+- 子模块需递归到底：`sitl_gazebo → external/OpticalFlow → external/klt_feature_tracker`；`jMAVSim → jMAVlib`；`mavlink → pymavlink`。
+- `make` 的 stdin 不能是 `/dev/null`：pxh 读到 EOF 会 `Exiting NOW` 自杀。用 FIFO 或 `sleep infinity` 顶住写端。
+- WSL PATH 里混入 Windows Anaconda 的 `protobuf-config.cmake` 会污染 cmake → 用干净 `PATH`（`env PATH=/usr/local/sbin:...`）构建 sitl_gazebo。
+- `bash -lc` 里 `pkill px4` 会误杀自身；后台保活唯一可靠法是 `setsid … < /dev/null &`。
+
+## 状态
+
+- issue 004：**可关闭**——确定结论"能跑，Gazebo Classic 11"已拿到闭环证据。
+- epic「剩余阻碍」：SITL 可行性不再是阻碍；PPT 仿真演示页可用本机实测截图/ULog（标注"仿真结果，非实机"）。

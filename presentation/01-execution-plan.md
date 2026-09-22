@@ -74,7 +74,7 @@
 - [x] 步骤1：已建立本计划，冻结14页与离线边界。
 - [x] 步骤2：已记录两个官方仓库提交与v1.13.3历史提交，完成证据索引。发现FMUv2的default与multicopter变体自动调参配置不同，已进入终稿。
 - [x] 步骤3（首轮·一小时门控）：已检查WSL/Ubuntu、命令路径、部分Python依赖、子模块和Docker缓存；当时按一小时门槛不进入实验。
-- [ ] 步骤3（本周·恢复执行）：准备时间延至 260929 后，一小时门槛解冻为分阶段搭建+采证。进行中——v1.13.3 worktree、子模块、WSL 原生依赖（备选 px4-dev-simulation-focal 容器）、QGC 连通与 go/no-go 采证门见 `03-simulation-assessment.md` 重新评估小节与 `.cs/notes/004-PX4仿真SITL路径.md`。
+- [x] 步骤3（本周·恢复执行）：准备时间延至 260929 后，一小时门槛解冻为分阶段搭建+采证。**已完成——go/no-go = go**。v1.13.3 worktree + 全量子模块 + WSL 原生依赖（cmake/ninja/gcc-9、gazebo11+libgazebo11-dev 11.15.1、openjdk-13+ant、empy==3.3.4）就绪；`make px4_sitl_default` 编译通过；`make px4_sitl gazebo` 拉起 gzserver/gzclient（WSLg）+ px4，`pxh>` 闭环 `takeoff→land→Disarmed` 实测成功。证据 `.cs/evidence/sitl/`（2 个 ULog + console log + 截图），结论与复现命令见 `.cs/notes/004-PX4仿真SITL路径.md` 与 `03-simulation-assessment.md` 重新评估小节。QGC 连通（WSL2 NAT 需指定地面站地址）为可选加分项，未阻塞结论。
 - [x] 步骤4：已逐张读四张候选图；两张入选，两张因误读风险或主题不匹配不入主稿。固件图中V6X身份及安全图中的Lockdown均已识别。
 - [x] 步骤5：14页终稿已完成，含上屏文字、图示规格、图注、引用、讲述提示、衔接及预计时长。
 - [x] 步骤6：核对页码1至14、各页时长合计670秒；原始文件与两张选图路径经Git文件索引复核；终稿无项目管理文件引用。
@@ -83,7 +83,7 @@
 
 1. `01-execution-plan.md`：本计划与完成记录。
 2. `02-evidence-and-assets.md`：原始证据、版本边界、选图审查。
-3. `03-simulation-assessment.md`：仿真一小时门控的实际检查和取舍。
+3. `03-simulation-assessment.md`：仿真一小时门控的实际检查、取舍，及 2026-09-22 解冻后的重新评估（含跑通结论与复核命令）。
 4. `04-final-slide-outline.md`：交给后续PPT制作工具的主入口。
 
 检查范围说明：IDE未返回上述Markdown的诊断；这不是专门Markdown解析器的验证。未生成PPT，未进行实际试讲计时；670秒是内容分配预算，不是测得时长。没有修改两个参考仓库，也没有将既有实机或PPT制作任务关闭。
