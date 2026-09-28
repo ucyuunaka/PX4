@@ -1,5 +1,7 @@
 # 本轮SITL一小时可行性评估
 
+> **历史文档**：结论已定——**本机 SITL 能跑**（2026-09-22，PX4 v1.13.3 + Gazebo Classic 11.15.1，WSL2 Ubuntu-20.04），见文末「重新评估」一节。前半部分是首轮"一小时门控"下的止损留档，仅作过程记录。实测截图与日志已移到 `../assets/sitl/`。
+
 ## 决策
 
 **本轮不进入仿真实验。现有证据不足以承诺在一小时内完成“安装/编译、连接、飞行闭环、采证和复现记录”；在不新增网络依赖的准备策略下，继续尝试的收益低于完成汇报内容。**
@@ -113,7 +115,7 @@ docker image ls --format '{{.Repository}}:{{.Tag}} {{.Size}}'
 ### 最终结论
 
 - **能跑**：PX4 v1.13.3 + Gazebo Classic 11.15.1 + iris + empty.world，WSL2 Ubuntu-20.04 原生。
-- **闭环证据**：`.cs/evidence/sitl/` 下 `flight_loop_12_09_45.ulg`、`flight_loop_12_13_56.ulg`、`sitl_console.log`、`gazebo_hover.png`。
+- **闭环证据**：`../assets/sitl/` 下 `flight_loop_12_09_45.ulg`、`flight_loop_12_13_56.ulg`、`sitl_console.log`、`gazebo_hover.png`。
 - **演示方式**：Gazebo GUI 走 WSLg，Windows 截屏/录屏直接可用；飞行数据有 ULog。
 - **遗留说明**：飞行中出现 `Failsafe enabled: no RC and no datalink`（无遥控器/地面站的预期告警），已通过置参（`NAV_DLL_ACT=0` 等）抑制；QGC 连通为可选加分项，不阻塞结论。
 - 详细命令链、踩坑与复现步骤见 `.cs/notes/004-PX4仿真SITL路径.md`。
