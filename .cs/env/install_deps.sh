@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # SITL-only dependency install for PX4 v1.13.3 on Ubuntu 20.04 (focal).
 # Mirrors Tools/setup/ubuntu.sh but skips the NuttX cross toolchain.
+# NOTE: after step 2, pin empy: python3 -m pip install empy==3.3.4 (empy 4.x removed em.RAW_OPT).
 set -e
 export DEBIAN_FRONTEND=noninteractive
 cd /mnt/u/ucy/Code/active/PX4/references/PX4-Autopilot/.cs/env/px4-sitl-v1.13.3

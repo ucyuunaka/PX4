@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Rewrite .gitmodules URLs github.com -> ghfast.top mirror, then init+update
 # only the submodules needed to build px4_sitl (gazebo + jmavsim).
+# NOTE: incomplete - v1.13.3 configure also needs Tools/{flightgear_bridge,jsbsim_bridge,simulation-ignition},
+# and the nested src/modules/mavlink/mavlink/pymavlink submodule. See .cs/notes/004 section 8.
 set -e
 cd /mnt/u/ucy/Code/active/PX4/references/PX4-Autopilot/.cs/env/px4-sitl-v1.13.3
 
