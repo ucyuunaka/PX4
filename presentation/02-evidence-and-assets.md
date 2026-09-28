@@ -1,8 +1,10 @@
 # 原始证据与选图审查
 
+> 本文件是 `04` 页脚证据编号（P/Q/H/M、A1–A4）的索引：每条写明原始文件、章节和出处边界。P/Q/H 条目在 v1 阶段离线核查建立，v2 沿用；v2 新增的外部开源仓库素材登记在 `research/sources.md`，图片文件集中在 `assets/`。
+
 ## 取材与版本声明
 
-本轮仅离线读取本地官方仓库、Git历史及本机环境。未联网搜索、拉取、下载，未观看新增在线视频。管理记录仅帮助理解任务，不是技术证据；最终PPT不引用任何 `.cs/` 文件。
+本文件的 P/Q/H 条目只读取本地官方仓库、Git 历史及本机环境。管理记录仅帮助理解任务，不是技术证据；最终PPT不引用任何 `.cs/` 文件。
 
 原始版本锚点：
 
@@ -161,25 +163,25 @@
 
 ## M类：本机直接检查
 
-- M1：WSL、Ubuntu、工具链、容器缓存及子模块检查，完整证据和命令见 `03-simulation-assessment.md`。
-- M1为本轮环境检查的复核记录，不是飞行实验或性能测试；第10页来源写“本机环境检查”，不写“PX4官方结论”。
+- M1：WSL、Ubuntu、工具链、容器缓存及子模块检查，完整证据和命令见 `history/v1-simulation-assessment.md`。
+- M1为首轮环境检查的复核记录（现存 `history/v1-simulation-assessment.md`），已被 M1b 实测结果取代。
 
-### M1b 仿真结果实测（2026-09-22 解冻后新增）
+### M1b 仿真结果实测（2026-09-22，第 2、12 页）
 
-- M1 从“预检”扩为“预检 + 仿真结果”。本机实测跑通 PX4 SITL 闭环，证据本机留存：
-  - `.cs/evidence/sitl/gazebo_hover.png`：Gazebo GUI 实测截图（iris 在 empty.world，WSLg 渲染到 Windows 桌面）。
-  - `.cs/evidence/sitl/flight_loop_12_09_45.ulg`、`flight_loop_12_13_56.ulg`：起飞→降落→上锁完整飞行日志。
-  - `.cs/evidence/sitl/sitl_console.log`：pxh 控制台输出（`Takeoff detected`/`Landing detected`/`Disarmed by landing`）。
+- 本机实测跑通 PX4 SITL 闭环，证据在 `assets/sitl/`：
+  - `gazebo_hover.png`、`gazebo_window.png`：Gazebo GUI 实测截图（iris 在 empty.world，WSLg 渲染到 Windows 桌面）。
+  - `flight_loop_12_09_45.ulg`、`flight_loop_12_13_56.ulg`：起飞→降落→上锁完整飞行日志。
+  - `sitl_console_clean.log`（原始版 `sitl_console.log`）：pxh 控制台输出，第 96–171 行含首飞 failsafe、置参与两次 `Takeoff detected`/`Landing detected`/`Disarmed by landing`。
 - 版本锚点：PX4 **v1.13.3**（`1c8ab2a0d7…`）、Gazebo Classic **11.15.1**、WSL2 Ubuntu-20.04.6。
 - 启动方式：`make px4_sitl gazebo`（`/root/px4-sitl-src` worktree 副本）。
 - 可讲：本机实测 SITL 能跑，闭环起飞降落成功，截图/ULog 为本机结果。
-- 不可讲：仿真结果 ≠ 实机结果；不证明实机接线/校准/动力；QGC 连通为可选项未实测。截图标注“本机 SITL 仿真（v1.13.3 + Gazebo 11）”，与官方示例图区分。
+- 边界：仿真结果不等于实机结果；QGC 连通本次未测（闭环用 pxh 控制台完成）。截图标注“本机 SITL 实测（v1.13.3 + Gazebo 11），非实机”，与官方示例图区分。
 
 ## 图片：已实际读图的四张候选
 
-图片由本地读取请求与会话随后呈现的四张图逐张核验。读取工具的文本包装曾显示“0 bytes”，不能据此认定原文件为空；视觉结论来自实际呈现图像。后续制作应从以下原始路径取图。
+四张图均已实际读图核验。入选的 A1、A4 已复制到 `assets/official/`；引用时写下列原始路径。v2 另选用 QGC MAVLink Inspector 图（第 5 页，`assets/official/mavlink_inspector.jpg`）。
 
-### A1 固件选择界面：入选第6页
+### A1 固件选择界面：入选第8页
 
 - 文件：`references/PX4-Autopilot/docs/assets/qgc/setup/firmware/firmware_connected_default_px4.png`。
 - 母文档：P4。
@@ -194,17 +196,17 @@
 - 文件：`references/PX4-Autopilot/docs/assets/qgc/setup/safety/safety_setup.png`。
 - 母文档：P7。
 - 读图：1024x938；包含电量15/7/5%、低电量Warning、RC Loss动作Lockdown与0.5s；还包含Obstacle Avoidance等区域。
-- 弃用原因：具体示例数值与危险动作容易被误读为推荐配置，且杂项分散主题。第7页改用“触发条件→预设动作→实际验证”自绘逻辑，不复制这些参数。
+- 弃用原因：具体示例数值与危险动作容易被误读为推荐配置，且杂项分散主题。第9页（三关口）改用自绘逻辑，不复制这些参数。
 
 ### A3 混合PID结构：读图通过，主稿不选
 
 - 文件：`references/PX4-Autopilot/docs/assets/mc_pid_tuning/PID_algorithm_Mixed.png`。
 - 母文档：P9。
 - 读图：578x370；r与反馈y作差得到e，经K分到P/I；另一路反馈y经K和-D进入求和，再经G(s)输出y。D项不是简单对误差求导的同一路结构。
-- 不选原因：本次重点是验证路线，公式级框图会占用解释时间。第8页改用简化级联关系，自绘时不把所有控制环统一标成PID。
-- 如后续另做控制专题可使用，不纳入本次14页必需素材。
+- 不选原因：本次重点是验证路线，公式级框图会占用解释时间。第10页（调参）改用简化级联关系，自绘时不把所有控制环统一标成PID。
+- 如后续另做控制专题可使用；v2 有页数余量，需要时可作备用页。
 
-### A4 QGC飞行视图：入选第3页
+### A4 QGC飞行视图：入选第1、3页
 
 - 文件：`references/PX4-Autopilot/docs/assets/concepts/qgc_fly_view.png`。
 - 母文档：P1。
@@ -218,7 +220,7 @@
 - 所有自绘图的节点、边、文字在最终逐页稿中锁定；图注写“根据[证据编号]整理的概念示意”或“本项目拟验证路线”。
 - 概念关系图不画未确定的线束针脚、电源电压、串口编号、电机编号或ROS 2协议拓扑。
 - 计划图不伪装成已实现架构；仿真图不画成实机已连通；双机图不用编队效果图。
-- 当前不需要新增图片或视频下载，不以不存在的实物照片作为封面制作前提。
+- 不以不存在的实物照片作为封面制作前提。外部项目动图按 `assets/README.md` 取用并标项目名。
 
 ## 引用定位模板
 

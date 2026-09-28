@@ -39,13 +39,13 @@
 ### C. 演示素材
 | 编号 | 一句话 | 出处 | 状态 | 备注 |
 |---|---|---|---|---|
-| C-01 | QGC 固件刷写界面 | references/PX4-Autopilot/docs/assets | ✅ 已有 | =02 中的 A1 |
-| C-02 | QGC Fly View 主界面 | references/PX4-Autopilot/docs/assets | ✅ 已有 | =02 中的 A4 |
-| C-03 | 本机 SITL Gazebo 截图 | .cs/evidence/sitl/gazebo_hover.png | ✅ 已有 | 本机实测 |
-| C-04 | Flight Review 界面 | review.px4.io / 仓库 | ⬜ 待截图 | 存 media/；本地 `references/flight_review` 有 README/截图可参考 |
-| C-05 | PlotJuggler 界面 | github.com/PlotJuggler | ⬜ 待截图 | 存 media/；本地 `references/PlotJuggler` 已 clone |
-| C-06 | Gazebo 多机 SITL 场景 | PX4 Discuss/官方文档 | ⬜ 待找图 | 标"官方示例"；本地 `docs/en/sim_gazebo_classic/` 可能含多机图 |
-| C-07~09（新增）| **规划/集群演示 GIF** | 本地仓库自带 | ✅ **现成可用** | `Fast-Planner/files/*.gif`(8)、`ego-planner-swarm/pictures/*.gif`(5)、`ego-planner/pictures/*.gif`(4)——全是仓库自带演示动图，可直接作 PPT 第 11/12 页素材，标"开源项目官方演示"。优先 `ego-planner-swarm`（多机集群主题最贴） |
+| C-01 | QGC 固件刷写界面 | references/PX4-Autopilot/docs/assets | ✅ 入选-第8页 | =02 中的 A1；副本 `assets/official/` |
+| C-02 | QGC Fly View 主界面 | references/PX4-Autopilot/docs/assets | ✅ 入选-第1、3页 | =02 中的 A4；副本 `assets/official/` |
+| C-03 | 本机 SITL Gazebo 截图 | presentation/assets/sitl/gazebo_hover.png | ✅ 入选-第2、12页 | 本机实测；第 12 页另加 pyulog 绘制的 ULog 曲线 `assets/sitl/plots/` |
+| C-04 | Flight Review 界面 | review.px4.io / 仓库 | ⬜ 待定（第 12 页已用 pyulog 曲线替代） | 可用本机 ULog（`assets/sitl/*.ulg`）上传/本地打开后截图，存 `assets/`；本地 `references/flight_review` |
+| C-05 | PlotJuggler 界面 | github.com/PlotJuggler | ⬜ 待定 | 同上，可用本机 ULog 截图，存 `assets/`；本地 `references/PlotJuggler` 已 clone |
+| C-06 | Gazebo 多机 SITL 场景 | PX4 Discuss/官方文档 | ⬜ 待定 | 标"官方示例"；本地 `docs/en/sim_gazebo_classic/` 可能含多机图；也可本机跑 `gazebo_sitl_multiple_run.sh` 自截 |
+| C-07~09（新增）| **规划/集群演示 GIF** | 本地仓库自带 | ✅ 入选-第16页（Fast-Planner raptor1、ego-planner title + comp.jpg）、第17页（ego-planner-swarm 4 张） | 已复制到 `assets/external/`；其余候选留在 `references/`（见 `assets/README.md`），标"开源项目官方演示" |
 
 ### D. v1.13 补充（本地已有，供核查对照）
 | 编号 | 一句话 | 出处 | 状态 | 备注 |
