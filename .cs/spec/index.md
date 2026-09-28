@@ -9,14 +9,14 @@
 - 处于入门阶段：已有 PIX 2.4.8 克隆板（飞控）与 F450 机架，正在收集装机/调参/固件刷写资料。
 - QGC 已安装于 `U:\expro\QGroundControl\bin\QGroundControl.exe`（v5.0.3 master 构建，已验证可运行）；固件刷写走 QGC 在线下载，早期网盘资源已确认无需找回。
 - 项目当前是"资料 + 调参工作库"形态；尚无代码。本机已可跑 PX4 SITL 仿真（v1.13.3 + Gazebo Classic 11，WSL2），实测起飞-降落闭环通过。
-- 当前有一条进行中的工作线：组会 PPT 与 PX4 资料搜集（见 `.cs/epics/001-o-组会PPT与PX4资料搜集/spec.md`），面向组会，实物 bring-up 不在其边界内。**外部调研素材池已建成**（`presentation/research/`：调研 AI 产出已核查、6 个外部仓库已 clone、17 个演示 GIF 可用），正进入 PPT 内容返修阶段。
+- 当前有一条进行中的工作线：组会 PPT 与 PX4 资料搜集（见 `.cs/epics/001-o-组会PPT与PX4资料搜集/spec.md`），面向组会，实物 bring-up 不在其边界内。PPT 内容稿 v2（20 页）已写完并逐页复核，素材集中在 `presentation/assets/`，工作区入口 `presentation/README.md`；下一步是制作 PPT 文件。
 
 ## 能力地图
 
 - 入门资源索引：`.cs/notes/001-入门资源索引.md`（装机、调参、QGC 教程与官方下载渠道）
 - 本地文档查阅：`.cs/notes/002-PX4本地文档查阅.md`（PX4 与 QGC 官方文档离线版）
 - references 仓库索引：`.cs/notes/003-references仓库索引.md`（19 个本地 clone 的用途、活跃度与版本基线适配，含调研补充的 6 个外部开源项目）
-- **本机 SITL 仿真路径**：`.cs/notes/004-PX4仿真SITL路径.md`（WSL2 + Gazebo Classic 11 跑通起飞-降落闭环的确定结论、环境前提、复现命令与坑位备忘）；实测证据在 `.cs/evidence/sitl/`
+- **本机 SITL 仿真路径**：`.cs/notes/004-PX4仿真SITL路径.md`（WSL2 + Gazebo Classic 11 跑通起飞-降落闭环的确定结论、环境前提、复现命令与坑位备忘）；实测证据在 `presentation/assets/sitl/`
 - 草稿收件箱：`inbox.md`（未整理内容暂存，整理后分流到 `.cs/`）
 
 ## 使用路径
@@ -42,6 +42,7 @@
 - 想理解项目当前在做什么：读本文件「当前状态与重点」
 - 想找教程和资源链接：读 `.cs/notes/001-入门资源索引.md`
 - 想找本地已有的开源仓库/调研素材：读 `.cs/notes/003-references仓库索引.md` 与 `presentation/research/sources.md`
+- 想做或改组会 PPT：读 `presentation/README.md`
 - 想看待办事项：读 `.cs/issues/`
 
 ## 当前边界
@@ -62,5 +63,5 @@
 - 入门教程与官方下载渠道汇总：`.cs/notes/001-入门资源索引.md`
 - 本地文档查阅方式：`.cs/notes/002-PX4本地文档查阅.md`
 - 失效资源核查结论（已关闭）：`.cs/issues/001-x-找回调参与QGC资源.md`
-- 本机 SITL 仿真闭环证据：`.cs/evidence/sitl/`（2 个 ULog + 控制台 log + Gazebo 截图）
+- 本机 SITL 仿真闭环证据：`presentation/assets/sitl/`（2 个 ULog + 控制台 log + 2 张 Gazebo 截图；放在 presentation 下便于 PPT 引用）
 - 进行中的组会资料搜集线：`.cs/epics/001-o-组会PPT与PX4资料搜集/spec.md`

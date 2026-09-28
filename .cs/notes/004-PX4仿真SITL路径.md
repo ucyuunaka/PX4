@@ -26,7 +26,7 @@
 ## 三、实测跑通的闭环（本次采证）
 
 - `pxh>` 控制台注入 `commander takeoff` → `Takeoff detected` → `commander land` → `Landing at current position` → `Landing detected` → `Disarmed by landing`。
-- 完整日志 `INFO` 序列在 `.cs/evidence/sitl/sitl_console.log`。
+- 完整日志 `INFO` 序列在 `presentation/assets/sitl/sitl_console_clean.log`（去掉终端转义的可读版，第 96–171 行；原始版 `sitl_console.log`）。第一次起飞未置参，failsafe 触发 RTL 后自动降落；置参后两次 `takeoff`/`land` 闭环对应两份 ULog。
 - 期间出现 `WARN [commander] Failsafe enabled: no RC and no datalink`（无遥控器/地面站时的预期告警），已通过置参 `NAV_DLL_ACT=0`、`NAV_RCL_ACT=0`、`COM_LOW_BAT_ACT=0`、`COM_RCL_EXCEPT=4` 让其不强制 RTL，仍可正常起飞降落。
 
 ## 四、本机环境前提（已验证）
@@ -44,10 +44,12 @@
 
 ## 六、证据清单（本机实测，非官方截图）
 
-- `.cs/evidence/sitl/flight_loop_12_09_45.ulg` — 完整起飞-降落-上锁飞行日志（44 MB）
-- `.cs/evidence/sitl/flight_loop_12_13_56.ulg` — 第二次复飞日志（10 MB）
-- `.cs/evidence/sitl/sitl_console.log` — pxh 控制台输出（含 Takeoff/Landing/Disarmed 序列）
-- `.cs/evidence/sitl/gazebo_hover.png` — Gazebo GUI 截图（WSLg 渲染到 Windows 桌面）
+证据在 `presentation/assets/sitl/`（2026-09-28 从 `.cs/evidence/sitl/` 迁出，便于 PPT 直接引用）：
+
+- `flight_loop_12_09_45.ulg` — 完整起飞-降落-上锁飞行日志（44 MB）
+- `flight_loop_12_13_56.ulg` — 第二次复飞日志（10 MB）
+- `sitl_console.log` / `sitl_console_clean.log` — pxh 控制台输出（原始 / 可读版）
+- `gazebo_hover.png`、`gazebo_window.png` — Gazebo GUI 截图（WSLg 渲染到 Windows 桌面）
 
 ## 七、复现步骤（精简）
 
@@ -67,8 +69,11 @@ commander land
 - `make` 的 stdin 不能是 `/dev/null`：pxh 读到 EOF 会 `Exiting NOW` 自杀。用 FIFO 或 `sleep infinity` 顶住写端。
 - WSL PATH 里混入 Windows Anaconda 的 `protobuf-config.cmake` 会污染 cmake → 用干净 `PATH`（`env PATH=/usr/local/sbin:...`）构建 sitl_gazebo。
 - `bash -lc` 里 `pkill px4` 会误杀自身；后台保活唯一可靠法是 `setsid … < /dev/null &`。
+- 启动器与构建脚本：WSL `/root/px4-build/run_gazebo2.sh`（干净 PATH + FIFO stdin）、`build_sitl.sh`；仓库内备份在 `.cs/env/run_gazebo.sh`、`.cs/env/build_sitl.sh`。`.cs/env/setup_submodules.sh`、`install_deps.sh` 是早期版本，缺三个 bridge 子模块、嵌套 pymavlink 与 empy 钉版，脚本头已注明。
+- 更多排错细节（worktree `.git` 指针改写、rsync 后子模块 gitdir 修复、cmake 对 ExternalProject 目录的硬校验、empy 4.x 不兼容等）见根目录 `HANDOFF.md`「踩过的坑」。
 
 ## 状态
 
-- issue 004：**可关闭**——确定结论"能跑，Gazebo Classic 11"已拿到闭环证据。
-- epic「剩余阻碍」：SITL 可行性不再是阻碍；PPT 仿真演示页可用本机实测截图/ULog（标注"仿真结果，非实机"）。
+- issue 004 已完成：确定结论"能跑，Gazebo Classic 11"并拿到闭环证据。
+- PPT 第 2、12 页使用本机实测截图/日志（标注"本机 SITL 实测，非实机"）。
+- 未做：QGC 连 SITL、多机 SITL（`Tools/gazebo_sitl_multiple_run.sh`）。

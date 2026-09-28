@@ -4,27 +4,29 @@ overview: 已确认走路径 B：解冻 presentation/01-execution-plan.md 中的
 todos:
   - id: unfreeze
     content: 解冻 01-execution-plan.md：一小时门控改为分阶段搭建+采证，补环境联网例外说明
-    status: in_progress
+    status: completed
   - id: env
     content: 环境准备：v1.13.3 worktree + 子模块 + WSL 原生依赖（备选 px4-dev-simulation-focal 容器）+ QGC 连通
-    status: pending
+    status: completed
   - id: capture
     content: go/no-go 采证：最小闭环（连接-起飞-悬停-降落）+ 截图/日志 + 复现记录，阻塞即止损
-    status: pending
+    status: completed
   - id: issue004
     content: 产出 .cs/notes/004 并回写 issue 004 与 epic（含不能跑时的演示策略）
-    status: pending
+    status: completed
   - id: evidence
     content: 03 补重新评估小节；02 扩 M1 为预检+仿真结果证据
-    status: pending
+    status: completed
   - id: outline
     content: 04 第10页按真实结果重写，联动第2/9/13/14页并重分配 670 秒
-    status: pending
+    status: completed
   - id: rehearse
     content: 试讲计时校验（issue 006 验证），收口备选口径
-    status: pending
+    status: cancelled
 isProject: false
 ---
+
+> 已执行完毕（2026-09-22）。后续 PPT 工作见 `presentation/README.md`；"试讲计时"已按用户要求取消（不设时长）。
 
 ## 确认参数
 
