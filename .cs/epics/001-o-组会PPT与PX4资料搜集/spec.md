@@ -65,11 +65,11 @@ created: 2026-09-17
 
 ### Issues（按需）
 
-- [ ] `.cs/issues/002-o-锁定PX4版本基线与检索清单.md`：把 v1.13.x 版本基线写进 spec，列出本轮各检索面的目标词与产出约定；依赖：无；验证：spec 回写 + 检索清单成文。
-- [ ] `.cs/issues/003-o-检索单机调试链路.md`：搜集 2.4.8 + F450 的刷机→校准→调参→首飞官方文档与教程，标注版本；产出 `.cs/notes/003-...`；验证：每个关键结论可回指官方来源。
+- [x] `.cs/issues/002-o-锁定PX4版本基线与检索清单.md`：把 v1.13.x 版本基线写进 spec，列出本轮各检索面的目标词与产出约定；依赖：无；验证：spec 回写 + 检索清单成文。→ **已完成**：版本基线已回写 `.cs/spec/index.md`「关键考量」；各检索面约定已实际用于 003–005 的产出核对。
+- [x] `.cs/issues/003-o-检索单机调试链路.md`：搜集 2.4.8 + F450 的刷机→校准→调参→首飞官方文档与教程，标注版本；产出 `.cs/notes/003-...`；验证：每个关键结论可回指官方来源。→ **已完成（落点变更）**：结论未落在独立 `notes/003`，而是直接成文为 `presentation/02-evidence-and-assets.md` 的 P3–P10 / Q1–Q2 证据条目（每条含原始文件路径、章节、可讲/不可讲边界），并被 `04-final-slide-outline.md` 第 5–8 页引用。
 - [x] `.cs/issues/004-o-检索PX4仿真SITL路径.md`：确认本机能否跑 SITL/Gazebo/jMAVSim，确定可演示的仿真栈与录屏/截图方法；产出 `notes`；验证：给出"能跑/不能跑 + 用哪个仿真器 + 怎么录"的确定结论。→ **已完成（2026-09-22）**：能跑，Gazebo Classic 11.15.1，起飞-降落闭环实测通过，证据在 `.cs/evidence/sitl/`。
-- [ ] `.cs/issues/005-o-检索多机协同与学术综述.md`：搜集多机 MAVLink 拓扑 / QGC 多机 / ROS2-or-swarm 依赖 + PX4 在教学科研集群的用法；产出 `notes` 喂 PPT 展望与相关工作页；验证：多机路径有明确拓扑与依赖结论。
-- [ ] `.cs/issues/006-o-汇总成组会PPT.md`：把检索结论组织成 PPT（选型依据 + 调试链路 + 仿真演示 + 多机展望 + 相关工作）；依赖：002–005；验证：成稿可完整讲一遍。
+- [x] `.cs/issues/005-o-检索多机协同与学术综述.md`：搜集多机 MAVLink 拓扑 / QGC 多机 / ROS2-or-swarm 依赖 + PX4 在教学科研集群的用法；产出 `notes` 喂 PPT 展望与相关工作页；验证：多机路径有明确拓扑与依赖结论。→ **已完成（落点变更）**：多机路径结论成文为 `presentation/02-evidence-and-assets.md` 的 P12/P13/H3 证据条目并喂入 `04-final-slide-outline.md` 第 11–12 页；ROS2↔fmu-v2 适配性结论留在 `.cs/notes/003-references仓库索引.md`。**2026-09-28 增强**：外部调研 AI 已补齐多机/学术/素材素材池，产出 `presentation/research/raw/2026-09-27-多机协同与素材调研.md`，经本地核查登记于 `presentation/research/sources.md`（6 个外部仓库已 clone 进 `references/` 并核对）。
+- [ ] `.cs/issues/006-o-汇总成组会PPT.md`：内容稿已完成（`presentation/04-final-slide-outline.md` 14 页终稿 + 证据索引）。**返修进行中**：素材池已备齐（调研 AI 产出已核查+登记），待按三方向（加厚文本/收敛过度约束/整合新素材）改 `04`。详见 issue 006 正文更新。
 
 ### 剩余阻碍
 
@@ -83,8 +83,9 @@ created: 2026-09-17
 
 ## 未确认问题
 
-- 组会 PPT 的具体时长/模板要求：影响检索深度与各页详略，需用户提供或在成稿时按通用组会汇报（约 8–15 页）处理。
+- 组会 PPT 的具体时长/模板要求：内容稿按 14 页 / 约 11 分 10 秒设计（`presentation/04-final-slide-outline.md`），正式模板与排版风格未定，不影响内容返修。
 - ~~本机 SITL/Gazebo 是否可跑~~ → **已定论（2026-09-22）**：可跑。WSL2 Ubuntu-20.04 + Gazebo Classic 11.15.1 + v1.13.3 实测闭环成功，证据 `.cs/evidence/sitl/`。
+- ~~外部调研 AI 的接入方式~~ → **已落定（2026-09-27/28）**：调研 AI 可联网，提示词定稿于 `presentation/research-prompt-draft.md`（约束：v1.13.x 基线、每条带出处、产出素材池不预裁）。产出已返回并经本地核查，登记于 `presentation/research/sources.md`；6 个外部仓库（MAVSDK、Fast-Drone-250、Fast-Planner、ego-planner、ego-planner-swarm、mavsdk_drone_show）已 clone 进 `references/` 并核对 remote。⚠️ 调研报告 Works cited 引用了 `.cs/` 内部文件（编号 9/10/11/15/31）——这些编号在 PPT 中禁用，核查时已回指真实外部来源。
 
 ## 关闭条件
 
@@ -98,10 +99,10 @@ created: 2026-09-17
 
 ## 关闭回写
 
-- 状态：open
+- 状态：open（issue 006 内容返修中，其余 issue 均已实质完成）
 - 合并位置：（待定，关闭时填 `.cs/spec/index.md`）
-- Vision 同步：关闭时检查 `.cs/vision/index.md`，把"多机协同"构想与"单机调试"里程碑的实现程度更新进去。
-- 保留材料：各检索 notes 作为后续 bring-up 的复用证据。
+- Vision 同步：关闭时检查 `.cs/vision/index.md`，把"多机协同"构想与"单机调试"里程碑的实现程度更新进去。Vision 目前仍为空模板；P12/P13/H3 的多机路径结论与 `notes/003` 的 ROS2↔fmu-v2 适配结论已是可登记的输入。
+- 保留材料：各检索证据条目（`presentation/02` 的 P/Q/H 编号）、SITL 实测证据（`.cs/evidence/sitl/`）与 `notes/004` 复现路径，作为后续 bring-up 与返修的复用证据。
 
 ## 相关材料（按需）
 
