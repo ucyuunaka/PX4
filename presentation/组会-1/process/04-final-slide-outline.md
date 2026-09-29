@@ -1,0 +1,572 @@
+# 最终PPT完整内容大纲（v2 · 20页）
+
+## 制作交接说明
+
+**确定题目：《基于 PX4 的 F450 四旋翼平台：前期调研、单机调试路线与多机扩展规划》。**
+
+- 本版（v2）在原 14 页基础上扩为 **20 页**，含封面与来源页；篇幅上限 25 页，余量可用于拆页或加素材页。
+- 不设时长预算：讲多久因人因场而异，各页不再标注建议时长。
+- 这是内容稿，不是 PPT 文件；后续只需将"上屏文字"、图示和引用转入模板，讲述提示放入演讲者备注。
+- 图片素材已集中到 `presentation/组会-1/assets/`（本机 SITL 截图与日志、官方文档图、开源项目 GIF），出处见 `presentation/组会-1/assets/README.md`；上屏引用写原始出处。
+- v2 相比 v1 的变化：每页文本加厚、收敛了过度自我设限、新增核心技术专页（P4 PX4 软件栈、P5 MAVLink）、多机部分扩为三页（P13 接入拓扑 / P14 仿真路径 / P15 协同层次）、新增开源案例两页（P16 单机自主栈 / P17 集群）；P12 加入本机 ULog 飞行曲线。
+- 本次汇报内容：前期调研、单机调试路线、本机 SITL 实测（v1.13.3 + Gazebo 11 起飞-悬停-降落闭环）与多机扩展规划；实机飞行是下一阶段。
+- 版本事实如实表述：v1.13.x 为实机准备基线、历史源码核验落在 v1.13.3；新版（v1.14+）能力作为对照讲。
+- 引用约定：每条来源注明**本地路径**或**云端 URL** 便于溯源。**唯一禁止**：不引用 `.cs/` 内部文件；`02` 的 P/Q/H/M 编号可用作内部索引并标来源。
+
+---
+
+### 第1页：封面
+**性质：项目陈述**
+**中心结论：本次汇报围绕已有 F450 + PIX 2.4.8 平台，说明前期核查到的约束、单机如何分阶段验收、以及怎么往多机扩。**
+
+#### 上屏文字
+主标题：
+> 基于 PX4 的 F450 四旋翼平台
+
+副标题：
+> 前期调研、单机调试路线与多机扩展规划
+
+阶段说明（一行小字）：
+> 飞控软件栈 PX4 · 地面站 QGroundControl · 版本基线 v1.13.x（实测 v1.13.3）
+
+#### 图示
+封面中央放主/副标题；下方横贯一条自绘主题线索引，四个节点：`F450 / PIX 2.4.8` → `PX4 软件栈` → `单机验证` → `多机扩展`。右侧配 QGC 飞行视图缩略图（`../assets/official/qgc_fly_view.png`，原图 `references/PX4-Autopilot/docs/assets/concepts/qgc_fly_view.png`）作工具链直观提示。
+
+#### 图注
+`QGroundControl 官方文档界面示例，非本项目实测。`
+
+#### 引用
+`题目与汇报主线为本项目陈述；QGC 示例图：references/PX4-Autopilot/docs/en/getting_started/px4_basic_concepts.md`
+
+#### 讲述提示与衔接
+"这次汇报围绕已有的 F450 机架和 PIX 2.4.8 飞控，软件栈用 PX4、地面站是 QGroundControl。我先把平台里几个角色分清楚、讲清软件栈怎么组织，再说单机怎么一步步验收、以及为什么这套东西天然适合往多机扩。"
+衔接："先说目前实际推进到了哪一步。"
+
+---
+
+### 第2页：当前进展——资料核查完成，SITL 已跑通闭环
+**性质：项目陈述 + 本机实测**
+**中心结论：本轮把零散资料变成可追溯的路线，并在本机把 PX4 SITL 仿真闭环真实跑通；实机飞行是下一阶段。**
+
+#### 上屏文字
+- **已完成·资料核查**：基于本地 PX4 官方文档和 v1.13.3 历史源码，梳理平台角色、软件栈结构和版本边界，形成可追溯的原始证据索引。
+- **已完成·路线成形**：单机调试拆成有验收条件的关口，多机扩展拆成"接入—控制—协同"三个层次。
+- **已完成·仿真闭环**：本机实测 PX4 **v1.13.3 + Gazebo Classic 11.15.1**，WSL2 Ubuntu-20.04 上跑通 `起飞 → 悬停 → 降落 → 上锁`，留存 ULog 飞行日志、pxh 控制台记录和 Gazebo GUI 截图。
+- **已完成·素材与工具链**：本地收录 19 个开源仓库（PX4/QGC 官方栈、MAVSDK、日志分析工具 pyulog/PlotJuggler/flight_review、FAST Lab 自主规划与集群项目等），用 pyulog 解析了本机飞行日志。
+- **下一阶段**：实机侧固件适配、地面调试和首飞条件评估；仿真侧扩到双机。
+
+#### 图示
+自绘三节点进度链：`资料与路线（已完成）` → `SITL 仿真闭环（本机已跑通，贴 `../assets/sitl/gazebo_window.png` 小图）` → `单机实机 → 多机扩展（下一阶段）`。下方一行小字 `下一阶段：实机地面检查 + 双机仿真`。
+
+#### 图注
+Gazebo 小图：`本机 SITL 实测（PX4 v1.13.3 + Gazebo Classic 11，WSL2）；仿真结果，非实机飞行。`
+
+#### 引用
+`[M1b] 本机 SITL 实测：v1.13.3 + Gazebo Classic 11.15.1，WSL2；截图与日志：presentation/组会-1/assets/sitl/（gazebo_hover.png、sitl_console_clean.log、flight_loop_*.ulg）`
+
+#### 讲述提示与衔接
+"这轮做了三件事：把零散资料整理成能验收的路线，核对了当前文档和旧版源码的差异；在本机把 PX4 仿真闭环真正跑通了，起飞到上锁的日志、截图、曲线都有；还把后面要用的开源工具和集群项目都收进了本地。实机接线、校准和动力是下一阶段的事。"
+衔接："把这条路线讲清，先把平台里容易混淆的角色分出来。"
+
+---
+
+### 第3页：平台组成——硬件、飞控软件与地面站的分工
+**性质：官方概念 + 项目对象**
+**中心结论：Pixhawk 类硬件跑 PX4 负责实时稳定控制，QGC 是地面端负责配置监视，两者靠 MAVLink 通信——地面站不是飞控本身。**
+
+#### 上屏文字
+- **F450**：四旋翼机架，承载飞控、动力（电调+电机）与外设，是本项目硬件载体。
+- **PIX 2.4.8（FMUv2 类）**：飞控硬件，跑 PX4——负责状态估计（IMU/磁力计/气压计/GPS 融合）、姿态与位置控制、执行输出。
+- **PX4**：跑在飞控上的开源飞行栈，提供自稳、飞行模式、任务与安全保护。
+- **QGC**：地面站，承担固件刷写、参数配置、遥测监视与任务规划——是"地面端操作台"，控制闭环仍在飞控侧。
+- **MAVLink**：地面站与飞控之间的轻量通信协议，遥测下行、指令/任务上行都走它；遥控器链路是独立人工控制通道。
+
+#### 图示
+主图自绘概念关系图：`QGC` ⇄ `飞控：运行PX4`（边标 `MAVLink：遥测/配置/指令`）；`传感器` → 飞控（`测量`）；`遥控器/接收机` → 飞控（`人工控制输入`）；飞控 → `电调/电机`（`执行输出`）。飞控+传感器+电调圈进 `F450 飞行平台（概念）` 边界，QGC/遥控器在外。辅图 A4 QGC 飞行视图（`../assets/official/qgc_fly_view.png`）。
+
+#### 图注
+关系图：`根据官方 Basic Concepts 整理的概念示意。` QGC 图：`QGroundControl 官方文档界面示例，非本项目实测。`
+
+#### 引用
+`[P1] PX4 Basic Concepts：references/PX4-Autopilot/docs/en/getting_started/px4_basic_concepts.md`
+
+#### 讲述提示与衔接
+"关键是分工：QGC 能看状态、改参数、画航线，但真正算姿态、驱动电机的是飞控上的 PX4。右边是官方文档里的 QGC 飞行界面。MAVLink 是连接两头的协议，后面会专门讲。"
+衔接："那飞控上这套 PX4 内部怎么组织？看下一页。"
+
+---
+
+### 第4页：PX4 软件栈——模块怎么分工、靠什么连起来
+**性质：官方概念**
+**中心结论：PX4 分"飞行栈+中间件"两层，一堆自包含模块靠 uORB 发布/订阅消息总线异步通信——这套解耦结构正是它好调试、好扩展、适合多机的原因。**
+
+#### 上屏文字
+- PX4 顶层分两块：**飞行栈**（估计+控制算法）和**中间件**（传感器驱动、对外通信、消息总线 uORB），所有机型共用一套代码。
+- **uORB**：模块间发布/订阅消息总线，异步、线程安全；消息用 `msg/*.msg` 定义（`vehicle_attitude`、`vehicle_local_position`、`sensor_accel`），编译期自动生成代码。
+- **飞行栈流水线**：`sensors`（采集驱动数据发布）→ `ekf2`（EKF 姿态/位置估计）→ `mc_pos_control`/`mc_att_control`/`mc_rate_control`（位置→姿态→角速度三级级联）→ `control_allocator`/mixer（混控到电机）。
+- **模式与安全**：`commander`（模式切换+失效保护状态机）、`flight_mode_manager`（各模式设定值）、`navigator`（任务/起飞/返航）、`land_detector`（落地检测）。
+- **对外的脚**：`mavlink` 模块把 uORB 消息翻成外部协议、把外部指令翻回 uORB——是 PX4 连 QGC/伴飞电脑/仿真器的桥。
+- **日志也挂在总线上**：`logger` 模块订阅 uORB 话题写成 ULog 文件——第 12 页的飞行曲线就是从本机 ULog 里的 `vehicle_local_position`、`vehicle_attitude` 话题读出来的。
+- **为什么重要**：每个模块独立，可用 `pxh>` 的 `top`/`uorb top`/`listener` 实时看——调试单机靠它定位；对外接口统一走 uORB↔MAVLink，是接 MAVSDK 多机、接 Gazebo 仿真的同一扇门。
+
+#### 图示
+自绘简化软件栈图（两层）：上层中间件 `传感器驱动 → uORB 总线 → mavlink → QGC/伴飞/仿真器`；下层飞行栈 `ekf2 → mc_pos_control → mc_att_control → mc_rate_control → mixer/输出`，各控制器从总线取估计状态；侧挂 `commander/navigator/logger`。辅图官方高层飞行栈图 `../assets/official/PX4_High-Level_Flight-Stack.svg`（原图 `references/PX4-Autopilot/docs/assets/diagrams/`；节点 Sensors→Estimator→Navigator→Position Controller→Attitude & Rate Controller→Mixer→Actuator，RC 旁路输入）缩小对照。
+
+#### 图注
+自绘图：`根据 PX4 Architectural Overview 整理的简化示意，省略部分连接细节。` 官方图：`PX4 官方高层飞行栈示意图（官方示例）。`
+
+#### 引用
+`[P] references/PX4-Autopilot/docs/en/concept/architecture.md；middleware/uorb.md；modules/modules_controller.md、modules_system.md；v1.13.3:boards/px4/fmu-v2/default.px4board`
+
+#### 讲述提示与衔接
+"PX4 不是一整块硬编码，是模块拼的：驱动发数据上 uORB 总线，ekf2 做估计，位置—姿态—角速度三级级联，最后混控到电机。mavlink 是 PX4 的一只脚，把内部消息翻成外部协议。这套解耦一是调试能逐个看，二是对外接口走同一扇门。"
+衔接："那只对外的脚用什么协议、怎么认出多架机？下一页讲 MAVLink。"
+
+---
+
+### 第5页：MAVLink——飞控和外部世界之间的轻量协议
+**性质：官方概念 + 历史源码核验**
+**中心结论：MAVLink 是为低带宽不可靠链路设计的轻量消息协议，靠"消息+微服务"覆盖遥测/指令/任务/参数——PX4/QGC/MAVSDK/仿真器靠它互通，sysid 字段还是多机认机的天然钩子。**
+
+#### 上屏文字
+- **是什么**：为无人机生态设计的轻量协议，针对低带宽、可丢包数传链路。裸消息很轻——只带名字、ID、字段，不保证重传，适合高频遥测（`ATTITUDE`、`LOCAL_POSITION_NED`）。
+- **微服务**：裸消息上叠的"元协议"，处理一条消息装不下的交互。命令协议用 `COMMAND_INT`/`COMMAND_LONG` 发指令（如 `MAV_CMD_NAV_TAKEOFF`）、等 `COMMAND_ACK` 并可重传；另有参数、任务、FTP 等微服务——QGC 的"改参/画航线/传文件"底层都是这些。
+- **生态粘合**：PX4 默认构建 `common.xml` 消息集，QGC、MAVSDK、MAVLink 外设、仿真器都讲这套语言。
+- **在 PX4 里**：`src/modules/mavlink` 是 uORB↔外部翻译层；可按链路选 profile（`normal` 给 GCS、`onboard` 给伴飞、`config` 高速 USB、`minimal`/`iridium` 给窄带）。
+- **多机钩子**：每个包带 `sysid`（`MAV_SYS_ID` 参数），QGC 靠心跳按 sysid 认机、MAVSDK 靠 `get_system_id()` 路由——同一信道分清哪架是哪架。
+- **对本项目**：单机靠 MAVLink 把遥测/指令接进 QGC；SITL 时 PX4 经 UDP（GCS `14550`、offboard `14540`）连 QGC/MAVSDK；往后多机就是给每架配不同 `MAV_SYS_ID`、同套接口逐个寻址。
+
+#### 图示
+自绘"一条 MAVLink 信道多方接入"：中心 `PX4（mavlink模块）` 引出边到 `QGC`（遥测/指令，`14550`）、`MAVSDK/伴飞`（offboard，`14540`）、`仿真器`（`TCP 4560/UDP`）、`MAVLink 外设`。每边标走的微服务（Command/Parameter/Mission/遥测流）。角上加 `sysid → 多机区分` 小框。辅图 QGC MAVLink Inspector `../assets/official/mavlink_inspector.jpg`（原图 `references/qgroundcontrol/docs/assets/analyze/mavlink_inspector/mavlink_inspector.jpg`，可实时查看每条消息的字段和频率）。
+
+#### 图注
+自绘图：`根据 PX4 MAVLink 文档与 v1.13.3 SITL 端口脚本整理；端口为 SITL 默认约定。` QGC Inspector：`QGroundControl 官方界面示例，非本项目实测。`
+
+#### 引用
+`[P] references/PX4-Autopilot/docs/en/mavlink/index.md；mavlink/protocols.md；mavlink/mavlink_profiles.md；v1.13.3:ROMFS/px4fmu_common/init.d-posix/px4-rc.mavlink；v1.13.3:ROMFS/.../rcS（MAV_SYS_ID=px4_instance+1）；references/qgroundcontrol/docs/en/qgc-user-guide/analyze_view/mavlink_inspector.md`
+
+#### 讲述提示与衔接
+"MAVLink 是给又慢又会丢包的链路设计的：裸消息轻、不保证到达，适合刷屏遥测；要确认的事交给微服务——发起飞命令会等 ACK。PX4、QGC、MAVSDK、Gazebo 都讲这门语言。最关键的伏笔是 sysid——同一信道靠它认机，这是多机的地基。"
+衔接："平台和软件栈讲清了，接下来看版本——为什么这块老板子让我们把基线钉在 v1.13。"
+
+---
+
+### 第6页：版本基线——选 v1.13.x 是在旧硬件上收敛兼容性风险
+**性质：项目陈述 + 历史源码核验**
+**中心结论：PIX 2.4.8 是 FMUv2 类停产平台，选 v1.13.x 作基线让硬件约束先暴露，而不是赌新版本向后兼容。**
+
+#### 上屏文字
+- 官方已把 3DR Pixhawk 1 列入 discontinued（FMUv2），注明"可能仍能在新版本工作，但不是保证"——沿用老平台要自己承担版本验证。
+- FMUv2 受 STM32F427 硅片 errata 约束，官方将 FMUv2 固件限制在 1MB Flash；构建目标 `CONFIG_BOARD_CONSTRAINED_FLASH=y`、`CONSTRAINED_MEMORY=y`。
+- v1.13.3 源码 `boards/px4/fmu-v2/` 下有 `default`/`multicopter`/`fixedwing`/`rover` 四个构建变体——同板型同版本，功能集合并不相同。
+- 我们的取舍：v1.13.x 是 FMUv2 构建目标齐全、与中文教程生态最匹配、且 SITL 已实测跑通（v1.13.3）的版本，作为实机准备基线。
+- 新版差异举例：v1.14 起 ROS 2 接口从 microRTPS 换成 uXRCE-DDS、执行器配置界面改版——教程和截图要认准版本（见第 15 页）。
+- 版本核验手段：`git show v1.13.3:<path>` 直接读历史构建配置，不凭版本号猜功能。
+
+#### 图示
+自绘"版本决策天平"：左 `FMUv2/PIX 2.4.8（1MB Flash 受限）`；右 `PX4 版本轴 v1.11→v1.13.3→v1.14+`，v1.13.3 高亮。下方两条摘录 `v1.13.3:default.px4board → CONSTRAINED_FLASH=y`、`官方目录：3DR Pixhawk 1 (FMUv2)—discontinued`。底注 `已实测锚点：SITL 闭环跑通于 v1.13.3`。
+
+#### 图注
+版本事实核验（历史源码 + 官方文档）。
+
+#### 引用
+`references/PX4-Autopilot/docs/en/flight_controller/autopilot_discontinued.md；flight_controller/pixhawk_series.md、silicon_errata.md；v1.13.3:boards/px4/fmu-v2/default.px4board（tag 1c8ab2a0）`
+
+#### 讲述提示与衔接
+"FMUv2 是受限平台，1MB Flash 决定功能必须取舍。我们在 v1.13.3 源码确认了 fmu-v2 构建目标真实存在，SITL 也是这版跑通的，所以冻结为基线。"
+衔接："基线定了，单机调试按什么顺序验收？"
+
+---
+
+### 第7页：单机调试路线——按官方配置类拆成可验收的四步
+**性质：官方概念 + 项目计划**
+**中心结论：沿用官方"先固件机架、后执行器/传感器/遥控/安全、调参最后"的次序，把单机调试拆成四级验收，每级都有明确通过物。**
+
+#### 上屏文字
+- 官方配置文档只强制两点：先装固件选机架；调参必须在其他配置之后。我们按验收依赖重排，不照抄点击顺序。
+- **第一步 固件与机架**：刷对版本、选对 airframe——选机架写入机型、电机数与相对位置等初始参数，是后面一切配置的地基。
+- **第二步 传感器与遥控**：罗盘/陀螺/加速度计校准+安装方向（`ROTATION_*`）确认；RC 通道映射、端点、反向校准，确认接收机失联上报方式（"保持最后值"无法被检测）。
+- **第三步 动力与安全**：PWM/OneShot 电调需校准（必须拆桨，DShot/CAN 不需要）；配置低电量、RC 失联、数据链失联 failsafe 动作。
+- **第四步 首飞与复盘**：满足前置后受控首飞，日志回看后进入调参。
+
+#### 图示
+自绘四级验收链：`固件+机架→版本/机型参数落盘` → `传感器+遥控→校准完成+通道响应正确` → `电调+安全→拆桨校准+failsafe表` → `首飞+日志→ULog复盘`；节点4 回指节点3 虚线 `异常→回查`。
+
+#### 图注
+本项目按官方配置类别组织的验收路线；粒度按 F450 四旋翼裁剪。
+
+#### 引用
+`references/PX4-Autopilot/docs/en/config/index.md；config/radio.md；advanced_config/esc_calibration.md`
+
+#### 讲述提示与衔接
+"官方只规定首尾，我们落成四级验收，每级留能复查的东西——参数记录、校准结果、failsafe 表、ULog。前一关不过不往首飞推。"
+衔接："第一关最容易被'连上了'骗过的，是固件和机架。"
+
+---
+
+### 第8页：固件与机架——"识别到板子"只是起点
+**性质：官方概念（官方示例图）**
+**中心结论：QGC 自动识别板型并装 stable 固件，但"识别≠版本正确≠机架匹配"，三件事要分别核对。**
+
+#### 上屏文字
+- QGC 接上飞控按检测板型给固件选项，默认装**当前 stable**——不是我们要的 v1.13.x；历史/自定义版本走 `Advanced settings → Custom Firmware file`。
+- 识别到的不一定是手头这块板：官方示例图里 QGC 把对象识别为 **PX4 FMU V6X**——界面给什么身份要看清。
+- 固件装完必须选 airframe：写入机架类型、电机数与相对位置等初始参数；F450 属 Generic Quadrotor X 构型，应用后需重启生效。PX4 的四旋翼 X 电机编号与旋向是固定约定（右图），接线和桨叶方向必须照它核对。
+- FMUv2 特别注意：1MB Flash 限制下默认固件裁掉很多模块；若参数缺失，需 `px4_fmuv2_default boardconfig` 自行裁剪重建，或评估 bootloader 升 FMUv3（2MB）。
+- 留痕：板卡身份、固件来源（stable/custom）、airframe 选择都进配置记录。
+
+#### 图示
+主图（官方示例）：`references/PX4-Autopilot/docs/assets/qgc/setup/firmware/firmware_connected_default_px4.png`，保留完整界面，用标注框圈出 `识别对象：FMU V6X` 与 `固件选项/Advanced settings`。右侧辅图：官方 Quadrotor X 电机编号/旋向示意 `../assets/official/QuadRotorX.svg`（原图 `references/PX4-Autopilot/docs/assets/airframes/types/QuadRotorX.svg`，出自 `docs/en/airframes/airframe_reference.md`）。底部小链条 `识别板型→选固件→刷写→选airframe→参数落盘`。主图副本 `../assets/official/firmware_connected_default_px4.png`。
+
+#### 图注
+官方文档示例（图中识别对象为 FMU V6X，非本项目飞控）；电机示意取自 PX4 Airframe Reference。
+
+#### 引用
+`references/PX4-Autopilot/docs/en/config/firmware.md；config/airframe.md；references/qgroundcontrol/docs/en/qgc-user-guide/setup_view/firmware.md；advanced_config/parameters.md`
+
+#### 讲述提示与衔接
+"左边是官方文档的刷固件界面，注意它识别出来的是 V6X，所以'识别到什么板'要自己看清。'识别、固件、机架'三件事分开核；右边是 PX4 四旋翼 X 的电机编号和转向，F450 装机时电机和桨必须按它来。FMUv2 装完还可能缺模块，这直接引出下一页关口。"
+衔接："固件机架对了之后，上天前还有三道关口。"
+
+---
+
+### 第9页：三关口——感知、控制、保护，一个都不能省
+**性质：官方概念 + 项目检查设计**
+**中心结论：校准完成、人工控制正确、异常有保护是三个独立条件，必须分别验证留证。**
+
+#### 上屏文字
+- **关口一 感知**：罗盘/陀螺/加速度计逐项校准；飞控与外置罗盘安装方向（`ROTATION_*`）与实际一致——方向设错比不校准更危险；校准后姿态显示要跟得上真实运动。
+- **关口二 控制**：RC 校准覆盖通道映射、端点、反向；模式拨杆映射到目标飞行模式；电调/电机拆桨状态下验证响应（PWM/OneShot 校准行程，DShot/CAN 不需要）。
+- **关口三 保护**：低电量分级（`BAT_*_THR` 阈值、`COM_LOW_BAT_ACT`）；RC 失联 `NAV_RCL_ACT`（前提是接收机能上报失联）；数据链失联 `NAV_DLL_ACT`、地理围栏 `GF_*` 按需启用。
+- failsafe 触发后默认先 Hold `COM_FAIL_ACT_T` 秒再执行动作，人为接管留窗口——这个"缓冲期"逻辑要先想清楚。
+- 仿真里已经见过它触发：本机 SITL 首飞没接遥控和地面站，起飞后立即报 `no RC and no datalink` 并自动返航降落（第 12 页）——保护逻辑默认是开着的，实机更要按真实链路配置。
+- 每关留证：校准结果、通道监视记录、failsafe 配置表，作为首飞条件评估输入。
+
+#### 图示
+自绘三并列关口卡，各含 `检查项→通过证据`：`感知：方向+校准→姿态跟随/传感器绿标`；`控制：通道+模式+输出→杆量响应正确/拆桨电机检查`；`保护：触发+动作+缓冲→failsafe配置表`。三卡汇入 `首飞条件评估`。
+
+#### 图注
+检查逻辑示意（按官方文档整理）。
+
+#### 引用
+`references/qgroundcontrol/docs/en/qgc-user-guide/setup_view/sensors_px4.md；references/PX4-Autopilot/docs/en/config/radio.md；config/safety.md；advanced_config/esc_calibration.md`
+
+#### 讲述提示与衔接
+"遥控失联和地面站失联是两条独立链路，接收机若是'保持最后输出'型，PX4 根本检测不到失联——这类坑只能在关口检查里堵住。"
+衔接："三关过了、飞机能稳了，才轮到调参；而调参在这块板上有个版本坑。"
+
+---
+
+### 第10页：调参——先能稳，再谈好；autotune 要看构建变体
+**性质：官方概念 + 历史源码核验**
+**中心结论：PX4 多旋翼是级联控制，角速度内环是调参核心；autotune 能自动调内环，但 v1.13.3/FMUv2 的 default 固件不含该模块，必须用 multicopter 变体或自行重建。**
+
+#### 上屏文字
+- 控制结构：多旋翼级联——位置环（P）/速度环（PID）约 50 Hz → 姿态环（P）约 250 Hz → 角速度环（PID）约 1 kHz → 混控；角速度环最内层、频率最高，没调好所有模式都表现为抖动或漂移。
+- 官方推荐先 autotune：飞行中自动辨识并写入角速度/姿态环参数（`MAV_CMD_DO_AUTOTUNE_ENABLE`，约 40s）；前提是飞机已能自稳。
+- **版本事实（源码核验）**：v1.13.3 `mc_autotune_attitude_control` 模块默认 `n`；`fmu-v2/default` 未启用、`fmu-v2/multicopter` 显式 `=y`——同 v1.13.3 同板型，刷哪个变体决定有没有 autotune（对照：`fmu-v3/default` 因 2MB Flash 默认含）。
+- 手动调参路径：围绕悬停点迭代 `MC_ROLLRATE_*/MC_PITCHRATE_*/MC_YAWRATE_*`（P 增响应、D 阻尼、I 消静差）；开 `SDLOG_PROFILE` 高频日志用 ULog 评跟踪——本地已有 `flight_review`、`PlotJuggler`、`pyulog` 工具链，已用 pyulog 画出本机仿真的高度/姿态曲线（第 12 页），实机调参复盘用同一套方法。
+- 工作顺序：先排振动/安装/执行器基础问题 → autotune（若固件含）或手动粗调 → 日志复盘 → 精调；调参永远是最后一站。
+
+#### 图示
+主图官方多旋翼级联控制框图 `../assets/official/mc_control_arch.jpg`（原图 `references/PX4-Autopilot/docs/assets/diagrams/mc_control_arch.jpg`：Position(P)→Velocity(PID) 50 Hz → Acceleration and Yaw to Attitude → Angle(P) 250 Hz → Angular Rate(PID) 1 kHz → Mixer），角速度环加高亮框。侧栏源码摘录：`fmu-v2/default：无 MC_AUTOTUNE` / `fmu-v2/multicopter：=y` / `fmu-v3/default：=y`。
+
+#### 图注
+控制框图为 PX4 官方文档原图；构建差异为 v1.13.3 源码核验结果。
+
+#### 引用
+`references/PX4-Autopilot/docs/en/config_mc/pid_tuning_guide_multicopter.md；config/_autotune.md；flight_stack/controller_diagrams.md；v1.13.3:boards/px4/fmu-v2/{default,multicopter}.px4board；v1.13.3:src/modules/mc_autotune_attitude_control/Kconfig；日志工具 references/flight_review、PlotJuggler、pyulog`
+
+#### 讲述提示与衔接
+"一句话：autotune 是好东西，但'v1.13 支持'不等于'我刷的固件里有'——fmu-v2 default 就没有，得换 multicopter 变体。路径是先保证能自稳，再让工具或手动把内环收敛。"
+衔接："调参逻辑清楚了，接下来怎么在不动真机的情况下先把软件流程跑熟——这就是 SITL。"
+
+---
+
+### 第11页：SITL 概念——用电脑跑飞控软件，先把软件闭环验掉
+**性质：官方概念**
+**中心结论：SITL 让完整 PX4 飞控代码在计算机上运行、与仿真世界闭环交换数据，是实机之前验证软件流程的安全手段。**
+
+#### 上屏文字
+- SITL（Software In the Loop）：PX4 飞控代码不编译到飞控板，而作为普通进程跑在计算机上，与软件建模的"机体+传感器+世界"实时交互。
+- 数据流：仿真器把模拟 IMU/GPS/磁力计送进 PX4；PX4 的估计、控制、任务逻辑照常运行，再把电机/执行器输出送回仿真器驱动物理模型——两侧 lockstep 同步，可加速/暂停。
+- 交互方式和真机一致：QGC、MAVSDK、手柄都通过 MAVLink 连接，默认端口 GCS `UDP 14550`、offboard API `UDP 14540`、Gazebo `TCP 4560`。
+- 对本项目的意义：没有实体飞机也能先把"地面站连接→解锁→起飞→降落→上锁→看日志"整条软件链路验收一遍；F450 实机到位前，这是最便宜也最安全的第一道关口。
+- 定位：仿真负责软件流程；实机接线、校准、动力与机体振动在第 7–9 页的实机关口里验收。
+
+#### 图示
+主图官方 SITL 端口总览 `../assets/official/px4_sitl_overview.png`（原图 `references/PX4-Autopilot/docs/assets/simulation/px4_sitl_overview.png`：PX4 on SITL 经 UDP 14540 连 API/Offboard、UDP 14550 连 QGC、TCP 4560 连 Simulator）。辅图自绘 SITL 数据流框图：`QGC/MAVSDK` ⇄ `PX4 SITL（本机进程，同一套飞控代码）` ⇄ `仿真器：Gazebo Classic`；仿真器→PX4 标 `模拟传感器（HIL_SENSOR/HIL_GPS）`，PX4→仿真器 标 `电机/执行器输出（HIL_ACTUATOR_CONTROLS，TCP 4560）`。底部注释 `lockstep 同步；PX4_SIM_SPEED_FACTOR 调速`。
+
+#### 图注
+端口总览为 PX4 官方文档原图；数据流框图根据官方 Simulator MAVLink API 整理。
+
+#### 引用
+`references/PX4-Autopilot/docs/en/simulation/index.md（SITL/HITL 定义、Simulator MAVLink API、默认端口 14550/14540/4560）`
+
+#### 讲述提示与衔接
+"可以理解为：飞控软件一行不改，只是把板子换成电脑进程、飞机换成软件模型。对我们最直接的价值：F450 还没飞，软件整条链路可以先在机器上过一遍。下一页就是我在这台机器上实际跑出来的结果。"
+
+---
+
+### 第12页：本机 SITL 实测——v1.13.3 起飞-悬停-降落闭环已在 WSL 跑通
+**性质：本机实测**
+**中心结论：本机实测 PX4 v1.13.3 + Gazebo Classic 11.15.1 在 WSL2 Ubuntu-20.04 完成三次起飞→悬停→降落→上锁闭环；从 ULog 读出的高度与姿态数据说明位置/姿态控制在仿真中稳定工作。**
+
+#### 上屏文字
+- **实测环境**：PX4 v1.13.3（与版本基线一致）+ Gazebo Classic 11.15.1 + iris 四旋翼 + empty.world；WSL2 Ubuntu-20.04.6，Gazebo 界面经 WSLg 直接显示在 Windows 桌面。
+- **操作过程**：`make px4_sitl gazebo` 拉起仿真 → `pxh>` 控制台 `commander takeoff` → 自动爬升到默认起飞高度 2.5 m 悬停 → `commander land` → 触地后自动上锁（`Landing detected` → `Disarmed by landing`）。共飞三次，后两次留存完整 ULog。
+- **日志读出的数据**（`flight_loop_12_13_56.ulg`，pyulog 解析）：离地后约 7 s 爬升到 2.5 m；悬停约 30 s，高度均值 2.51 m、标准差 0.03 m；悬停段横滚/俯仰都在 ±2.5° 以内；切换 `AUTO_LAND` 后约 5 s 触地、2 s 后上锁。另一段 200 s 长悬停（`12_09_45`）高度标准差同为 0.03 m。
+- **过程中解决的问题**：
+  - 首飞起飞后立刻报 `Failsafe enabled: no RC and no datalink` 并自动返航降落——没接遥控器和地面站时的正常保护行为；设 `NAV_DLL_ACT=0`、`NAV_RCL_ACT=0`、`COM_RCL_EXCEPT=4` 后正常起降。这正是第 9 页"保护关口"在仿真里的真实触发。
+  - pxh 控制台读到输入结束（EOF）会直接退出 PX4，后台运行时改用命名管道（FIFO）保持输入并注入命令。
+  - 源码放在 WSL 原生文件系统编译（`/mnt` 挂载盘太慢）；Windows 侧 Anaconda 的 protobuf 会污染 CMake，需用干净 PATH。
+- **意义**：v1.13.3 的完整软件链路（编译→仿真→控制→日志）在本机可复现，后面多机仿真、日志分析都在这套环境上扩展。
+
+#### 图示
+左侧主图：Gazebo 窗口截图 `../assets/sitl/gazebo_hover.png`（iris 悬停于 empty.world）。右侧主图：ULog 曲线 `../assets/sitl/plots/flight_12_13_56.png`（上：估计高度与设定值，标 AUTO_TAKEOFF/AUTO_LAND/上锁时刻；下：横滚/俯仰角）。底部一条控制台摘录（等宽字体，取自 `../assets/sitl/sitl_console_clean.log` 第 157–171 行）：
+```
+pxh> commander takeoff
+INFO  [commander] Armed by internal command
+INFO  [commander] Takeoff detected
+pxh> commander land
+INFO  [commander] Landing detected
+INFO  [commander] Disarmed by landing
+```
+
+#### 图注
+本机 SITL 实测（PX4 v1.13.3 + Gazebo Classic 11.15.1，WSL2）；仿真结果，非实机。曲线由本地 `references/pyulog` 解析本机 ULog 绘制。
+
+#### 引用
+`本机实测：presentation/组会-1/assets/sitl/（gazebo_hover.png、plots/flight_12_13_56.png、sitl_console_clean.log、flight_loop_12_09_45.ulg、flight_loop_12_13_56.ulg）；启动方式 references/PX4-Autopilot/docs/en/simulation/index.md；日志解析 references/pyulog（https://github.com/PX4/pyulog）`
+
+#### 讲述提示与衔接
+"环境补齐后我把它真正跑起来了：v1.13.3 在 WSL 里起 Gazebo，控制台一句 takeoff 就起飞，2.5 米悬停，land 降落、自动上锁。右边曲线是从这次飞行日志里画出来的：高度稳稳贴着设定值，悬停时上下波动大约 3 厘米，姿态角两度以内。中间踩过的坑也很有代表性——第一次起飞立刻触发了'无遥控无地面站'保护、自己返航降落了，这正是前面讲的保护关口在真实工作。单机软件闭环有了，如果要两架、三架呢？"
+衔接："下一页讲多机接入的身份和拓扑。"
+
+---
+
+### 第13页：多机接入与 MAVLink 拓扑——身份区分是一切的前提
+**性质：官方概念 + 历史源码核验**
+**中心结论：多机第一层问题是"谁是谁、走哪条链路"：每个 PX4 实例用不同 MAV_SYS_ID 和端口集合区分，QGC/MAVSDK 据此同时接入多机。**
+
+#### 上屏文字
+- 接入核心参数 `MAV_SYS_ID`：MAVLink 网络里每个飞行器的身份号。v1.13.3 SITL 启动脚本 `rcS` 写 `param set MAV_SYS_ID $((px4_instance+1))`——每多开一个实例身份自动 +1。
+- 端口同样按实例区分：v1.13.3 `px4-rc.mavlink` 中 offboard 口 `14540+px4_instance`、GCS 口按实例递增；实例超 9 个后统一回落 14549 避免端口重叠。Gazebo Classic 侧生成脚本给每模型分配 `mavlink_tcp_port 4560+N`、`mavlink_udp_port 14560+N`。
+- 地面站侧：QGC 收到多个系统心跳后提供下拉框切换"当前聚焦"的飞行器——多机接入在地面站层是原生能力。
+- 程序侧：MAVSDK 用 `add_any_connection("udpin://0.0.0.0:14540")` 监听后，`subscribe_on_new_system()` 自动发现新系统，`mavsdk.systems()` 遍历所有已连接系统、`get_system_id()` 取各自 MAVLink ID——一个程序即可管多架。
+- 对本项目的意义：F450 机队扩展的第一道工程题不是编队算法，而是先把每架机的身份、端口、遥测归属理清；这些在 SITL 里可以零成本先验证。
+
+#### 图示
+自绘多机接入拓扑：顶部 `QGC（下拉切换聚焦机）` 与 `MAVSDK 程序（systems() 遍历）`；中部 `MAVLink/UDP` 总线向下分出三支实例 `PX4实例0:ID=1,offboard 14540,sim 4560→iris_0`、`实例1:ID=2,offboard 14541,sim 4561→iris_1`、`实例2:ID=3,offboard 14542,sim 4562→iris_2`。右下注释 `端口号=基准+px4_instance（v1.13.3 px4-rc.mavlink 实算）`。
+
+#### 图注
+端口与系统 ID 分配按 PX4 v1.13.3 启动脚本源码整理（历史源码核验）。
+
+#### 引用
+`v1.13.3:ROMFS/px4fmu_common/init.d-posix/rcS（MAV_SYS_ID=px4_instance+1）、px4-rc.mavlink；v1.13.3:Tools/gazebo_sitl_multiple_run.sh；references/PX4-Autopilot/docs/en/simulation/index.md；references/MAVSDK/docs/en/cpp/guide/connections.md`
+
+#### 讲述提示与衔接
+"多机最朴素的问题是别把指令发错机。PX4 的做法直白：每起一个实例 ID 加一、端口按实例号排开；QGC 收到多心跳就出下拉框；MAVSDK 一个端口监听就能枚举所有系统。这些数字是我在 v1.13.3 启动脚本里逐行看到的。身份端口清楚了，下一个问题是仿真侧怎么一口气生成多架——下一页。"
+
+---
+
+### 第14页：多机仿真路径——官方脚本一键拉起 N 个实例
+**性质：官方示例 + 历史源码核验**
+**中心结论：PX4 官方自带多机 SITL 脚本（有/无 ROS 两条路径），v1.13.3 对应 `Tools/gazebo_sitl_multiple_run.sh`，一条命令即可生成多架不同身份的实例。**
+
+#### 上屏文字
+- 官方入口：`Tools/simulation/gazebo-classic/sitl_multiple_run.sh`（v1.13.3 对应 `Tools/gazebo_sitl_multiple_run.sh`），用法 `sitl_multiple_run.sh -m iris -n 3`，支持 `-w` 选世界、`-s "iris:3,plane:2"` 混合机型批量生成。
+- 脚本做了什么：先 `gzserver` 起世界，再循环每架机——用 jinja 模板把 `mavlink_tcp_port=4560+N`、`mavlink_udp_port=14560+N`、`mavlink_id=1+N` 烧进各自 SDF，`gz model --spawn-file` 按间隔摆放，同时以 `-i N` 启动独立 PX4 进程（独立 `instance_N` 目录、独立 rcS）。
+- 无 ROS 即可跑：这条路径只需 Gazebo Classic + SITL 构建（Linux）；需要 ROS 时另有 `multi_uav_mavros_sitl.launch`（xacro + MAVROS 命名空间 `/uav1/mavros/...`）。
+- 身份约定：当前官方多机文档实例从 system id 2 起（跳过 1 兼容 ROS 2 命名空间），v1.13.3 脚本按 `1+实例号` 分配——起点不同，机制相同。
+- 对本项目的意义：多机 SITL 不需自研框架，官方脚本就是可复现入口；已跑通的单机环境（v1.13.3+Gazebo 11）与其同源，扩展成本主要是资源占用与身份规划。
+
+#### 图示
+自绘"脚本→多实例"展开图：左 `./Tools/gazebo_sitl_multiple_run.sh -m iris -n 3`；中 脚本动作列表 `gzserver 起世界→jinja 生成 SDF（各自端口/ID）→gz model 逐架 spawn→px4 -i N 逐实例启动`；右 产出 `3×iris@empty.world + instance_0/1/2 独立进程与日志`。底注 `无 ROS 路径：Gazebo Classic+SITL 即可`。
+
+#### 图注
+根据 PX4 v1.13.3 `Tools/gazebo_sitl_multiple_run.sh` 源码与官方多机文档整理；本机双机运行排在下一阶段（第 19 页 M3）。
+
+#### 引用
+`v1.13.3:Tools/gazebo_sitl_multiple_run.sh、Tools/sitl_multiple_run.sh；references/PX4-Autopilot/docs/en/sim_gazebo_classic/multi_vehicle_simulation.md；references/PX4-Autopilot/docs/en/simulation/multi-vehicle-simulation.md`
+
+#### 讲述提示与衔接
+"PX4 官方给了现成多机路径，不需要 ROS：一个脚本 -m 选模型 -n 选架数，内部每架生成带独立端口的 SDF、摆到世界、再起独立 PX4 进程。我看的是 v1.13.3 那份，端口 ID 公式都在。也就是说我们的 SITL 环境可以直接朝多机扩。但能看到多架机，离'协同'还有好几层——下一页把这个层次拆开。"
+
+---
+
+### 第15页：多机协同层次——接入、控制、协同是三段不同的工作
+**性质：官方概念 + 项目计划**
+**中心结论：多机分三层——接入（身份/链路）、控制（指令归属）、协同（共同目标与算法）；前两层靠 PX4/MAVSDK 现有机制，第三层才需要上层程序与可能的机载算力。**
+
+#### 上屏文字
+- **第 1 层·接入**：MAV_SYS_ID + 端口区分每架机（第 13 页机制），QGC 可切换监控、MAVSDK 可枚举全部系统——官方机制已覆盖。
+- **第 2 层·控制**：把指令只发给目标机。MAVSDK 用 `mavsdk.systems()` 拿到每个 `System` 后分别调插件下发动作；各机状态/日志按系统 ID 归属，互不串扰。
+- **第 3 层·协同**：共同目标、时序配合、避碰与任务分配——这层不在 QGC/PX4 标配里，需要上层协调程序（跑在地面站或伴飞计算机上），如用 MAVSDK-Python/C++ 写 fleet 管理进程。
+- **机载算力的时机**：地面端集中协调够用时不加硬件；需要机载实时感知/规划（视觉避障、集群自主决策）时才加伴飞计算机。v1.13 代际的机载-伴飞接口是 microRTPS：源码有 `src/modules/micrortps_bridge`，但 `rtps.px4board` 变体只在 sitl、fmu-v5/v5x、fmuk66、pixracerpro 等大 Flash 板上提供，**fmu-v2 没有**——正好回应 FMUv2 Flash 受限：重协同算力要往外放。
+- **本项目收敛**：先在 SITL 内把第 1、2 层验证掉（双机各自识别、各自收指令），再讨论协同算法选型。
+
+#### 图示
+右侧官方图 `../assets/official/px4_companion_computer_simple.svg`（原图 `references/PX4-Autopilot/docs/assets/diagrams/px4_companion_computer_simple.svg`，出自 `docs/en/companion_computer/index.md`：飞控跑 PX4/NuttX 负责飞行与安全，伴飞电脑跑 Linux 负责重计算，二者经串口/以太网用 MAVLink 或 uXRCE-DDS 通信）。左侧自绘三层阶梯：`L1 接入：MAV_SYS_ID+端口→QGC/MAVSDK 同看 N 架（官方机制已覆盖）`；`L2 控制：per-System 指令下发→指令归属正确（MAVSDK systems()）`；`L3 协同：上层协调程序→共同目标/避碰/任务分配（研究空间）`。侧注 `机载协同接口：v1.13=microRTPS；fmu-v2 无 rtps 变体→算力外挂时机后置`。
+
+#### 图注
+三层划分为本项目根据官方文档与 v1.13.3 源码归纳；伴飞架构图为 PX4 官方文档原图（其中 uXRCE-DDS 属 v1.14+，v1.13 对应 microRTPS）。
+
+#### 引用
+`references/MAVSDK/docs/en/cpp/guide/connections.md；v1.13.3:src/modules/micrortps_bridge/（Kconfig；boards/*/rtps.px4board 共 9 个，含 px4/sitl、px4/fmu-v5、px4/fmu-v5x，fmu-v2 无）；references/PX4-Autopilot/docs/en/companion_computer/index.md；references/PX4-Autopilot/docs/en/middleware/micrortps.md；references/micrortps_agent/README.md`
+
+#### 讲述提示与衔接
+"拆成三层后归属就清楚：接入靠 ID 和端口 PX4 已做好；控制靠 MAVSDK systems() 一套 API 管多架；真正的研究空间在第三层。什么时候加伴飞？v1.13 机载协同接口是 microRTPS，而我们 fmu-v2 连 rtps 构建变体都没有——算力升级放到确实需要机载自主那步再说。接下来两页看开源世界把这些层做成什么样。"
+
+---
+
+### 第16页：开源案例（一）单机自主栈——机载算力 + 规划 + PX4 底层控制
+**性质：研究案例**
+**中心结论：浙大 FAST Lab / 港科大的开源项目给出了一套完整的单机自主飞行做法：机载电脑负责定位与规划，PX4 飞控只负责底层姿态控制——这是本项目将来"加算力"的现成参照。**
+
+#### 上屏文字
+- **Fast-Drone-250（浙大 FAST Lab 整机课程）**：从零搭一架 250 mm 轴距自主无人机的全套开源资料，配 B 站系列视频。机载 Intel NUC 跑三件事：VINS-Fusion 视觉惯性定位（RealSense 深度相机）→ EGO-Planner 局部轨迹规划 → px4ctrl 把轨迹转成控制量，经 MAVLink offboard 高频发给飞控。飞控刷 PX4 fmu-v5，配套固件基于 v1.11.0（README 注明 v1.13 不适用于该项目）。
+- **Fast-Planner（港科大 HKUST，RA-L 2019 / ICRA 2020）**：确立"前端 kinodynamic 路径搜索 + 后端 B-spline 轨迹优化"的范式，演示中无人机在未知复杂环境里高速穿越；是 EGO-Planner、FUEL、RACER 等后续工作的上游基线。
+- **EGO-Planner（浙大 FAST Lab）**：去掉了维护 ESDF 距离场这一步，直接用障碍物梯度优化轨迹。README 给出的对比：EWOK 需 6.43 ms 建 ESDF + 1.39 ms 规划，Fast-Planner 4.01 + 3.29 ms，EGO-Planner 0 + 0.81 ms——计算量小到可以在机载电脑上实时跑。
+- **共同架构**：感知与规划在机载电脑（Linux + ROS），飞控只收位置/速度/姿态设定值。这把"算力需求"和"飞控硬件"解耦：飞控 Flash 再紧，重计算也可以放到伴飞电脑上。
+- **对本项目的意义**：FMUv2 做不了机载规划，但可以按这个分工当"底层飞控"用；将来加伴飞电脑时，Fast-Drone-250 的物料清单、接线和参数文件是直接可查的参考。
+
+#### 图示
+左上 GIF `../assets/external/Fast-Planner/raptor1.gif`（Fast-Planner 高速穿越演示）；左下 GIF `../assets/external/ego-planner/title.gif`（EGO-Planner 飞行演示）。右侧放 `../assets/external/ego-planner/comp.jpg`（EGO-Planner 官方对比图：飞行画面 + 计算耗时柱状图）。底部自绘"单机自主栈"分层条：`RealSense 深度相机 → VINS-Fusion 定位 → EGO-Planner 轨迹 → px4ctrl → PX4 飞控`，前四层标 `机载 NUC（Linux+ROS）`，末层标 `飞控板`，二者之间标 `MAVLink offboard`。
+
+#### 图注
+动图与对比图均为开源项目官方演示素材，非本项目实验：Fast-Planner（HKUST Aerial Robotics）、EGO-Planner（ZJU FAST Lab）。分层条按 Fast-Drone-250 仓库整理（fmu-v5 + PX4 v1.11）。
+
+#### 引用
+`references/Fast-Drone-250/readme_en.md（https://github.com/ZJU-FAST-Lab/Fast-Drone-250，视频 https://www.bilibili.com/video/BV1WZ4y167me）；references/Fast-Planner/README.md、files/raptor1.gif（https://github.com/HKUST-Aerial-Robotics/Fast-Planner）；references/ego-planner/README.md、pictures/{title.gif,comp.jpg}（https://github.com/ZJU-FAST-Lab/ego-planner）；references/PX4-Autopilot/docs/en/companion_computer/index.md`
+
+#### 讲述提示与衔接
+"先看单机怎么做到自主。浙大 FAST Lab 的 250 整机课程是国内做得最完整的开源方案：机载 NUC 上跑视觉定位、轨迹规划和控制转换，PX4 只负责最底层的姿态稳定。左边两段动图是 Fast-Planner 和 EGO-Planner 的演示，右边这张图说明 EGO-Planner 为什么能在机载电脑上跑——它把规划耗时压到了 1 毫秒以内。它们用的是 v1.11 固件和 fmu-v5，我们借的是这个分工思路：飞控管底层，重计算放伴飞电脑。"
+衔接："单机能自主了，多架飞机怎么协同？"
+
+---
+
+### 第17页：开源案例（二）集群——去中心化规划与 MAVSDK 编队两条路线
+**性质：研究案例**
+**中心结论：开源集群有两条代表性路线：EGO-Swarm 每架机载规划、互相广播轨迹（去中心化，需要 ROS 和机载算力）；mavsdk_drone_show 在地面用 MAVSDK 统一调度 PX4 机队（集中式，不需要 ROS）。二者正好对应本项目协同层次的两端。**
+
+#### 上屏文字
+- **EGO-Swarm（浙大 FAST Lab，ICRA 2021，Science 新闻报道过的"无人机群穿越森林"）**：每架机只用机载传感器和算力独立规划，把自己的 B-spline 轨迹广播给队友，据此互相避让；没有中心节点、各机异步运行。代码结构：`plan_manage`（重规划状态机）+ `rosmsg_tcp_bridge`（UDP 广播 + TCP 转发机间轨迹）+ `drone_detect`（识别队友）。仿真里一条 `roslaunch ego_planner swarm.launch` 可起多机编队穿越随机森林。
+- **仿真规模的现实约束**：EGO-Swarm README 提到，带动力学模型的多机仿真在 i7-9700KF 上约 15 架就到上限，因此默认改用 fake_drone 直接把指令转成里程计——多机仿真的计算量是要提前规划的资源。
+- **mavsdk_drone_show / MDS**：不跑 ROS，用 MAVSDK-Python 在地面统一管理 PX4 机队。`swarm.json` 声明 leader-follower 跟随关系与 NED/机体坐标偏移，经 offboard 发送 `VelocityNedYaw` 速度设定点；支持 SITL 多机演示（作者发布过 100 架 SITL 测试视频）、灯光秀轨迹回放。项目自述为 demo/beta。
+- **两条路线对比**：EGO-Swarm——去中心化、机载算力、ROS、适合未知环境自主穿越；MDS——集中式、地面调度、纯 MAVLink/MAVSDK、适合已知任务编队。
+- **对本项目的意义**：MDS 路线只需要第 13–15 页讲的 MAVLink 多机接入，FMUv2 + SITL 马上就能开始；EGO-Swarm 路线需要伴飞电脑，是明确的上探方向。
+
+#### 图示
+主视觉 2×2 GIF（仓库自带演示动图）：`../assets/external/ego-planner-swarm/title.gif`（多机丛林穿越）、`outdoor.gif`（户外真机）、`indoor1.gif`（室内真机）、`sim_demo.gif`（Rviz 仿真）。右侧自绘对比卡两列：`EGO-Swarm：去中心化｜机载规划｜ROS｜轨迹广播` / `MDS：集中式｜地面 MAVSDK｜无 ROS｜swarm.json 编队`，卡底标 `本项目：先 MDS 式接入 → 再上探 EGO 式`。
+
+#### 图注
+动图均为开源项目官方演示，非本项目实验：EGO-Swarm（ZJU FAST Lab，ICRA 2021）。MDS 为 MAVSDK-Python 集群项目（demo/beta）。
+
+#### 引用
+`references/ego-planner-swarm/README.md、src/planner/plan_manage/launch/swarm.launch、pictures/*.gif（https://github.com/ZJU-FAST-Lab/ego-planner-swarm；论文 https://ieeexplore.ieee.org/abstract/document/9561902；视频 https://www.bilibili.com/video/BV1Nt4y1e7KD）；references/mavsdk_drone_show/README.md、docs/features/smart-swarm.md、swarm.json（https://github.com/alireza787b/mavsdk_drone_show）`
+
+#### 讲述提示与衔接
+"集群这边看两个代表。EGO-Swarm 就是那个在森林里成群穿越的视频：每架飞机自己规划、把轨迹广播给队友，没有指挥中心——代价是每架都要带机载电脑、跑 ROS。另一个极端是 MDS：地面一个 Python 程序通过 MAVSDK 管整个机队，用配置文件写好谁跟谁、偏移多少，完全不需要 ROS。对我们来说，MDS 这条路用现在的 MAVLink 多机接入就能起步，EGO 式是往后加算力之后的方向。"
+衔接："案例看完，回到自己平台，把这些落成可切入的研究问题。"
+
+---
+
+### 第18页：研究切入点——先可复现，再可定义
+**性质：项目计划**
+**中心结论：把前面准备收敛为三级递进研究问题——可复现单机、可区分双机、可定义协同——每级都有可测量判据。**
+
+#### 上屏文字
+- **L1 可复现单机实验**（已基本具备）：v1.13.3 + Gazebo SITL 闭环已跑通，起飞-降落有 ULog 与控制台日志；研究问题落到"给定指令下响应是否符合目标"，日志可用 pyulog/PlotJuggler/flight_review 复盘。
+- **L2 可区分双机接入**：官方多机 SITL 脚本 `sitl_multiple_run.sh -m iris -n 2` 起两实例，v1.13.3 `rcS` 以 `MAV_SYS_ID=px4_instance+1` 区分身份；判据是"指令只作用于目标机、遥测/日志可归属"。
+- **L3 可定义协同任务**：在 L2 之上定义最小共同任务——参照 MDS leader-follower（`swarm.json`：follow/offset/frame）做集中式跟随，或参照 EGO-Swarm 轨迹广播做去中心化互避障；判据是"队形误差/避让成功率可测"。
+- **接口选型随层递进**：L2 阶段 MAVLink/MAVSDK 直连即可；引入机载视觉与局部规划（EGO 式栈）时才需要 ROS 生态，与版本基线匹配后再定（uXRCE-DDS 属 v1.14+，v1.13 对应 microRTPS 桥）。
+- **递进关系**：每级的产物是下一级的起点——L1 的日志分析方法直接用于 L2 的归属判定，L2 的双机接入就是 L3 的通信底座。
+
+#### 图示
+自绘三级阶梯：`L1 可复现单机：PX4 SITL+ULog→闭环复现/响应可复盘（已跑通）`；`L2 可区分双机：两实例+ID=2,3→指令隔离/状态归属`；`L3 可定义协同：leader→follower+offset→队形误差可测`。底部横轴 `接入→控制→协同`，右侧虚框 `机载算力/ROS 规划栈（远景：EGO 式）` 指向 L3。
+
+#### 图注
+自绘概念阶梯，根据本项目验证路线与 v1.13.3 源码事实整理；L1 标"本机 SITL 实测"。
+
+#### 引用
+`references/PX4-Autopilot/docs/en/sim_gazebo_classic/multi_vehicle_simulation.md；v1.13.3:ROMFS/px4fmu_common/init.d-posix/rcS；日志工具 references/pyulog、PlotJuggler、flight_review；协同参照 references/mavsdk_drone_show/swarm.json、references/ego-planner-swarm；references/PX4-Autopilot/docs/en/middleware/micrortps.md、ros2/user_guide.md（uXRCE-DDS 标 v1.14）`
+
+#### 讲述提示与衔接
+"这页是整份汇报的'研究翻译'：第一级我们已经踩上去了——SITL 闭环能复现、有日志能复盘。第二级双机，官方脚本和历史 rcS 都告诉我们身份怎么区分，验收判据是指令隔离和状态归属。第三级才谈协同，而且要先定义成可测的量。接口随层走：现在 MAVLink+MAVSDK 够用，上机载视觉规划才轮到 ROS。每级都有明确进入条件和产出证据。"
+衔接："三级切入点定下来后，下一阶段只剩把它排成可交付里程碑。"
+
+---
+
+### 第19页：下一阶段——用验收证据推进平台落地
+**性质：项目计划**
+**中心结论：下一阶段交付四个可检查证据包——版本冻结、实机地面检查、双机仿真闭环、协同任务定义——每个里程碑挂具体产物。**
+
+#### 上屏文字
+- **M1 版本与配置冻结**：记录实际板卡身份（克隆板丝印/BOOTLOADER 识别）、刷入固件构建目标与变体（fmu-v2 default/multicopter 差异影响 autotune）、机架选择与参数快照；产物=版本配置清单。
+- **M2 实机地面检查**（沿用调试路线）：拆桨状态下完成传感器校准、遥控通道/方向核对、电机序号与旋向检查、failsafe 配置核对；产物=地面检查记录+首飞条件评估。
+- **M3 双机 SITL 闭环**：`sitl_multiple_run.sh -m iris -n 2` 起双实例，QGC 按 MAV_SYS_ID 区分接入，用 MAVSDK `systems()`/`subscribe_on_new_system()` 枚举双机并分别下发指令；产物=双机遥测截图+指令归属日志。
+- **M4 协同任务最小定义**：从 MDS 式 leader-follower（1 架领航+1 架按 offset 跟随）起步，先写死 `swarm.json` 式分配文件，再评估是否上探机载规划；产物=任务定义文档+评测指标。
+- **优先级提请组会确认**：M2 与 M3 可并行；若资源受限建议先 M3——零硬件风险、直接验证多机接入层。
+
+#### 图示
+自绘里程碑流水线：`M1 版本冻结→版本/配置清单` → `M2 实机地面检查→检查记录+首飞评估` → `M3 双机SITL→接入/指令归属证据` → `M4 协同定义→任务文档+指标`。M3 上方挂已完成标记 `前置：单机 SITL 闭环已完成`。底部注 `M2 与 M3 可并行；不预设日期`。
+
+#### 图注
+本项目下一阶段计划与交付物；M2 检查项依据官方配置文档类别整理。
+
+#### 引用
+`references/PX4-Autopilot/docs/en/config/index.md、config/safety.md、advanced_config/esc_calibration.md；sim_gazebo_classic/multi_vehicle_simulation.md；v1.13.3:Tools/sitl_multiple_run.sh、ROMFS/.../rcS；references/MAVSDK/docs/en/cpp/guide/connections.md；references/mavsdk_drone_show/swarm.json、docs/features/smart-swarm.md`
+
+#### 讲述提示与衔接
+"下一阶段四个里程碑每个挂交付物。M1 先把'这块板子到底是什么、刷的什么固件'写成清单——克隆板和官方板不能直接画等号。M2 实机地面检查全拆桨做。M3 双机 SITL 用现成脚本就能起，重点验收指令归属。M4 才定义协同任务。我的建议 M3 优先于 M2：仿真双机没硬件风险。这个优先级想在组会上听意见。"
+衔接："最后把用到的原始来源集中列一页，方便会后核对。"
+
+---
+
+### 第20页：主要原始来源
+**性质：引用页**
+**中心结论：全部技术结论可回溯到本地官方文档、v1.13.3 历史源码、开源仓库原文与本机实测产物四类一手来源。**
+
+#### 上屏文字
+1. **PX4 官方文档**（本地快照 `references/PX4-Autopilot/docs/en/`）：Basic Concepts、架构、Configuration 系列、Airframe Reference、PID/Autotune、控制框图、Simulation、Multi-Vehicle、Companion Computers、uORB/microRTPS/MAVLink。云端：https://github.com/PX4/PX4-Autopilot/tree/main/docs/en
+2. **PX4 v1.13.3 历史源码**（本地 tag `v1.13.3` @ `1c8ab2a0`）：`boards/px4/fmu-v2/{default,multicopter}.px4board`、`mc_autotune_attitude_control/Kconfig`、`Tools/sitl_multiple_run.sh`、`ROMFS/px4fmu_common/init.d-posix/rcS`。
+3. **开源项目仓库**（`references/` 本地克隆）：Fast-Drone-250（fmu-v5/v1.11 整机课程）、ego-planner-swarm（EGO-Swarm, ICRA2021）、Fast-Planner（RA-L 2019/ICRA 2020）、ego-planner、mavsdk_drone_show/MDS、MAVSDK、PlotJuggler、pyulog、flight_review。云端：https://github.com/ZJU-FAST-Lab 、https://github.com/HKUST-Aerial-Robotics/Fast-Planner 、https://github.com/alireza787b/mavsdk_drone_show 、https://github.com/mavlink/MAVSDK
+4. **QGroundControl 官方文档**（`references/qgroundcontrol/docs/en/qgc-user-guide/`）：Firmware、Sensors 配置。
+5. **本机实测产物**：PX4 v1.13.3 + Gazebo Classic 11.15.1 + WSL2 Ubuntu-20.04，iris/empty.world 起飞-悬停-降落闭环；留存 ULog 日志、pxh 控制台记录、GUI 截图与 pyulog 绘制的飞行曲线（仿真结果，非实机）。
+
+#### 图示
+无自绘图。四组来源用四色小标签区分（官方文档/历史源码/开源仓库/本机实测），每条后带本地路径小字，云端 URL 只挂官方库各一条。
+
+#### 图注
+官方文档属当前开发快照（检出 `2028113139`）；版本差异页均经 v1.13.3 历史源码单独核验。外部开源项目按其仓库标注的版本前提引用。
+
+#### 引用
+`PX4 文档：https://github.com/PX4/PX4-Autopilot/blob/202811313926f3d719f7477bf497b199918a8f22/docs/en/；PX4 v1.13.3：https://github.com/PX4/PX4-Autopilot/tree/1c8ab2a0d7db2d14a6f320ebd8766b5ffaea28fa；QGC 文档：https://github.com/mavlink/qgroundcontrol/tree/dab963d852e6139288cec0f49b45fa4bfc44c2c1/docs/en/qgc-user-guide`
+
+#### 讲述提示与衔接
+"这页是来源索引：文档和历史源码都在本地仓库留了快照，外部项目 GIF 和结论对应各自 README 标注的版本，本机 SITL 日志截图单独归类并标'仿真非实机'。会后任何一条都能按路径回溯。以上是本次汇报，请各位老师同学指正。"
+
+---
+
+## 非页面附录：制作硬约束（v2）
+
+1. 总页数 **20 页**，上限 25 页；不设时长预算。
+2. **引用规则**：每条来源给本地路径或云端 URL；**绝不引用 `.cs/` 文件**。`02` 的 P/Q/H/M 编号可作内部索引。
+3. **身份标注只留三类**：官方/外部素材标"官方示例/项目名+版本前提"；本机仿真标"本机 SITL 实测，非实机"；版本事实（v1.13 vs v1.14+、fmu-v2 受限）如实讲。**不再堆**"不能写/未验证/不代表"式警示。
+4. **图片/GIF**：P1/P3/P5/P8 用官方文档图（标官方示例）；P2/P12 用本机 SITL 截图（标本机实测）；P10/P11/P15 用官方文档图；P16/P17 用仓库自带 GIF 与图（标项目名+版本前提）。文件已集中在 `presentation/组会-1/assets/`，出处见其 README。其余自绘图节点/边/文字按各页图示规格画。
+5. **Fast-Drone-250 版本前提**：它用 fmu-v5+PX4 v1.11（README 明 v1.13 不适用），引用时标"借架构不借版本"，不表述为 v1.13 可用方案。
+6. **fmu-v2 microRTPS 表述**：写"fmu-v2 在 v1.13.3 无 rtps 构建变体"（没有此选项），不写"默认未启用"。
+7. **多机 ID 起点**：当前官方文档实例从 ID 2 起、v1.13.3 脚本从 1 起——P14 已如实表述，不合并成单一口径。
+8. **讲述提示**放备注，不与上屏文字混排；来源映射放备注，不铺满页面。
+9. 自绘图是概念关系/拟验证流程，不含未经实测的电气接线、参数值、端口（除已核实的 SITL 默认端口）与性能数字。
+10. 模板、字体、排版风格由后续制作阶段决定；不加目录/致谢页。
+
+## 非页面附录：常见追问与回答要点
+
+- **仿真跑通了吗**：跑通了。v1.13.3+Gazebo Classic 11 在 WSL2 实测三次起飞-悬停-降落-上锁闭环，悬停高度标准差约 3 cm，日志、截图、曲线都是本机结果（P12）。实机接线、校准、动力在下一阶段实机关口验收。
+- **为什么用 v1.13.x**：手上的 FMUv2 平台 Flash 受限、官方已停产；v1.13.x 构建目标齐全、中文教程最多、SITL 已实测跑通，是兼容风险最小的起点。换受支持板后再追新版。
+- **能不能自动调参**：v1.13.3 的 fmu-v2 default 与 multicopter 变体配置不同——default 无 autotune、multicopter 有。取决于最终固件变体，且执行要先满足自稳前提。
+- **多机要不要 ROS 2**：分层次。接入/控制（L1/L2）用 MAVLink+MAVSDK 即可，不需 ROS；协同/机载规划（L3/EGO 式栈）才需要 ROS 生态，v1.13 对应 microRTPS 而非 uXRCE-DDS（v1.14+）。
+- **fmu-v2 能做协同吗**：能做 MAVLink 层的多机接入和地面集中调度（MDS 式）；飞控侧 ROS 接口（microRTPS）在 fmu-v2 没有构建变体，所以机载协同走"fmu-v2 管姿态底层 + 伴飞电脑跑规划"（Fast-Drone-250 式分工），或换受支持板。
+- **本轮成果**：可追溯证据索引 + 本机 SITL 实测闭环（含 ULog 曲线分析）+ 单机到多机的有验收条件路线 + 开源自主/集群案例参照。实机飞行是下一阶段。

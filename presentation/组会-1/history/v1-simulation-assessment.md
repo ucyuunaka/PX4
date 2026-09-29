@@ -1,0 +1,133 @@
+# 本轮SITL一小时可行性评估
+
+> **历史文档**：结论已定——**本机 SITL 能跑**（2026-09-22，PX4 v1.13.3 + Gazebo Classic 11.15.1，WSL2 Ubuntu-20.04），见文末「重新评估」一节。前半部分是首轮"一小时门控"下的止损留档，仅作过程记录。实测截图与日志已移到 `../assets/sitl/`。
+
+## 决策
+
+**本轮不进入仿真实验。现有证据不足以承诺在一小时内完成“安装/编译、连接、飞行闭环、采证和复现记录”；在不新增网络依赖的准备策略下，继续尝试的收益低于完成汇报内容。**
+
+这不是“WSL不能运行PX4”，也不是已经进行飞行实验后失败；是环境预检后做出的止损取舍。没有实际编译或性能计时，不给虚假的成功概率或精确耗时预测。
+
+## 一小时完成的定义
+
+必须全部满足：
+
+1. 明确PX4、仿真器、系统版本及启动方式。
+2. 仿真启动，QGC识别到模拟飞行器。
+3. 完成一次起飞、短时悬停、降落并解除解锁的闭环。
+4. 保存至少两张真实截图或短录屏，并有日志/状态证据。
+5. 记录复现步骤和限制，能够离线用于汇报。
+
+只安装好软件、编译成功、显示地图或启动一个进程，均不算彻底完成。
+
+## 已直接观察到的事实
+
+### 环境已具备的部分
+
+- `wsl.exe --list --verbose`：存在默认发行版Ubuntu-20.04，WSL版本2；初始为Stopped，检查命令启动了该发行版。
+- `lsb_release -ds`：Ubuntu 20.04.6 LTS。
+- `uname -r`：6.6.87.2-microsoft-standard-WSL2。
+- 检查输出显示图形环境变量 `DISPLAY=:0`、`WAYLAND_DISPLAY=wayland-0`；本轮未据此宣称图形应用或WSL到Windows QGC的通信已测试成功。
+- `/usr/bin/gcc`、`/usr/bin/g++`、`/usr/bin/make`、`/usr/bin/python3`、`/usr/bin/docker`可在默认命令路径找到。
+- Python版本3.8.10。
+
+### 当前缺口
+
+- 默认命令路径找不到cmake、ninja、java、ant、gazebo、gz、px4。
+- 直接执行cmake/ninja/java/gazebo/gz版本检查分别返回command not found。该结果仅代表本次默认环境，不排除其他虚拟环境或用户自定义位置另有安装。
+- Python当前环境：numpy、em、toml不可导入；jinja2、yaml存在。未做完整依赖清单验证，不能因部分包存在推断可编译。
+- 当前PX4 checkout的 `git submodule status` 全部条目带前导 `-`，包括MAVLink以及Gazebo Classic、gz、jMAVSim仿真子模块，表示尚未初始化。
+- Windows Docker CLI可列出本地镜像；缓存列表没有明确的PX4/SITL开发或仿真镜像。没有检查无关业务镜像内部，也没有启动或修改这些容器。
+- 当前源码为v1.18开发快照，汇报的实机准备基线是v1.13.x；直接构建当前分支会引入第二套版本验证任务。
+
+### 没有做的事
+
+- 未安装软件包，未拉取镜像，未初始化网络子模块。
+- 未切换或改动参考仓库，未启动SITL或QGC。
+- 未扫描用户所有目录寻找其他二进制；没有据此断言整台机器绝无可用缓存。
+- 未进行Windows与WSL通信、图形渲染和飞行实验。
+- 未编译v1.13.3，也未评估它在其他已配好环境中的绝对运行耗时。
+
+## 路线取舍
+
+### Gazebo路线
+
+当前默认环境缺少可调用的Gazebo命令，当前仓库仿真子模块未初始化，还缺构建依赖。需先补环境再处理版本匹配、编译、运行与采证。不能作为本次一小时内完整交付的可靠承诺。
+
+### jMAVSim路线
+
+当前默认环境缺少Java/Ant，jMAVSim子模块未初始化。轻量不等于零依赖，无法通过简单换仿真器消除准备工作。
+
+### 预构建镜像或已有二进制路线
+
+当前本地Docker镜像列表没有明确候选，默认命令路径也无px4。继续寻找或下载新的运行栈将扩大本轮范围；不做。
+
+### 当前文档中的轻量SIH路线
+
+即使不依赖外部三维仿真器，仍需匹配可用PX4构建与依赖。它也不能消除当前子模块/编译缺口，且不能把当前main的便利直接写成v1.13能力，因此不临时改道。
+
+## 最终PPT第10页的固定表述（首轮结论，已被重新评估取代）
+
+> 本机已具备WSL2与Ubuntu 20.04，但当前默认环境缺少关键构建/仿真工具，参考仓库子模块未初始化。本次以一小时内形成可展示、可复现证据为门槛，不临时搭建仿真栈。仿真实验移至后续，当前只给出最小验证设计。
+
+页面状态必须为“完成环境预检，未执行SITL飞行实验”。不放外部运行画面冒充本机结果。
+
+> 注：以上为**首轮一小时门控**下的第10页表述。2026-09-22 重新评估后 SITL 已实测跑通（见下节），第10页改按真实结果呈现；本段仅作首轮决策留档。
+
+## 复核命令
+
+以下命令均为读取状态；不同终端中请保持引号完整。Git命令从项目根目录执行。
+
+```bash
+wsl.exe --list --verbose
+wsl.exe -d Ubuntu-20.04 -- lsb_release -ds
+wsl.exe -d Ubuntu-20.04 -- uname -r
+wsl.exe -d Ubuntu-20.04 -- bash -lc 'command -v gcc g++ make cmake ninja python3 java ant gazebo gz px4 docker'
+wsl.exe -d Ubuntu-20.04 -- python3 --version
+git -C references/PX4-Autopilot submodule status
+docker image ls --format '{{.Repository}}:{{.Tag}} {{.Size}}'
+```
+
+初次工具路径循环受跨层Shell变量展开影响，产生空名称，因此未将那部分输出用作依赖判断；已经用不含循环变量的显式 `command -v` 和版本命令复核。
+
+## 重新评估条件
+
+组会后，或用户另行提供已经配好的运行目录/镜像时，再开展独立环境搭建任务。需要允许安装依赖和准备匹配版本，并将环境准备与一小时飞行演示分开计时。当前最终内容稿不依赖这项任务完成。
+
+---
+
+## 重新评估（2026-09-22 执行，环境联网已放宽）
+
+上文预检结论（"一小时门控内不进入仿真"）在其时限假设下仍成立；本节的"重新评估条件"已被满足——截止日延至 260929、环境搭建允许联网。重新执行结果如下。
+
+### 本周动作
+
+- 用 `git worktree` 检出 **v1.13.3** 到独立目录（不动主 v1.18 checkout），rsync 到 WSL 原生 ext4（`/root/px4-sitl-src`）避开 `/mnt` 9P 慢。
+- 按 `ghfast.top` 镜像初始化全部所需子模块（含递归：`sitl_gazebo→OpticalFlow→klt_feature_tracker`、`jMAVSim→jMAVlib`、`mavlink→pymavlink`）。
+- WSL 原生 apt 装齐依赖：cmake/ninja/gcc-9、openjdk-13+ant、`gazebo11 + libgazebo11-dev 11.15.1`、`empy==3.3.4`。
+- `make px4_sitl_default` 编译通过（`[837/837]`，0 错误，二进制 47 MB）。
+- `make px4_sitl gazebo` 拉起 `gzserver` + `gzclient`（WSLg 显示到 Windows 桌面）+ `px4`。
+
+### 决策点（go/no-go）
+
+**go**——拿到完整闭环证据。`pxh>` 控制台 `commander takeoff` → `Takeoff detected` → `commander land` → `Landing detected` → `Disarmed by landing`，ULog 落盘。
+
+### 最终结论
+
+- **能跑**：PX4 v1.13.3 + Gazebo Classic 11.15.1 + iris + empty.world，WSL2 Ubuntu-20.04 原生。
+- **闭环证据**：`../assets/sitl/` 下 `flight_loop_12_09_45.ulg`、`flight_loop_12_13_56.ulg`、`sitl_console.log`、`gazebo_hover.png`。
+- **演示方式**：Gazebo GUI 走 WSLg，Windows 截屏/录屏直接可用；飞行数据有 ULog。
+- **遗留说明**：飞行中出现 `Failsafe enabled: no RC and no datalink`（无遥控器/地面站的预期告警），已通过置参（`NAV_DLL_ACT=0` 等）抑制；QGC 连通为可选加分项，不阻塞结论。
+- 详细命令链、踩坑与复现步骤见 `.cs/notes/004-PX4仿真SITL路径.md`。
+
+### 复核命令（实测路径）
+
+```bash
+# WSL Ubuntu-20.04，源码副本 /root/px4-sitl-src（v1.13.3）
+cd /root/px4-sitl-src
+GIT_SUBMODULES_ARE_EVIL=1 make px4_sitl gazebo   # 起仿真（需保持 stdin 非 EOF，见 notes/004）
+# pxh> 控制台内：
+commander takeoff
+commander land
+# ULog: build/px4_sitl_default/tmp/rootfs/log/<date>/*.ulg
+```
