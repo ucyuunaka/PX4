@@ -26,7 +26,7 @@
 ## 三、实测跑通的闭环（本次采证）
 
 - `pxh>` 控制台注入 `commander takeoff` → `Takeoff detected` → `commander land` → `Landing at current position` → `Landing detected` → `Disarmed by landing`。
-- 完整日志 `INFO` 序列在 `presentation/assets/sitl/sitl_console_clean.log`（去掉终端转义的可读版，第 96–171 行；原始版 `sitl_console.log`）。第一次起飞未置参，failsafe 触发 RTL 后自动降落；置参后两次 `takeoff`/`land` 闭环对应两份 ULog。
+- 完整日志 `INFO` 序列在 `presentation/组会-1/assets/sitl/sitl_console_clean.log`（去掉终端转义的可读版，第 96–171 行；原始版 `sitl_console.log`）。第一次起飞未置参，failsafe 触发 RTL 后自动降落；置参后两次 `takeoff`/`land` 闭环对应两份 ULog。
 - 期间出现 `WARN [commander] Failsafe enabled: no RC and no datalink`（无遥控器/地面站时的预期告警），已通过置参 `NAV_DLL_ACT=0`、`NAV_RCL_ACT=0`、`COM_LOW_BAT_ACT=0`、`COM_RCL_EXCEPT=4` 让其不强制 RTL，仍可正常起飞降落。
 
 ## 四、本机环境前提（已验证）
@@ -44,7 +44,7 @@
 
 ## 六、证据清单（本机实测，非官方截图）
 
-证据在 `presentation/assets/sitl/`（2026-09-28 从 `.cs/evidence/sitl/` 迁出，便于 PPT 直接引用）：
+证据在 `presentation/组会-1/assets/sitl/`（2026-09-28 从 `.cs/evidence/sitl/` 迁出，2026-09-29 随组会场次目录重组再迁）：
 
 - `flight_loop_12_09_45.ulg` — 完整起飞-降落-上锁飞行日志（44 MB）
 - `flight_loop_12_13_56.ulg` — 第二次复飞日志（10 MB）

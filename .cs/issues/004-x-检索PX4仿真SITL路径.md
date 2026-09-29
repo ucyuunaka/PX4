@@ -2,9 +2,9 @@
 kind: issue
 title: "检索：PX4 仿真（SITL）路径与本机可行性"
 type: chore
-status: done
+status: closed
 created: 2026-09-17
-epic: ".cs/epics/001-o-组会PPT与PX4资料搜集/spec.md"
+epic: ".cs/epics/001-x-组会PPT与PX4资料搜集/spec.md"
 ---
 
 # 检索：PX4 仿真（SITL）路径与本机可行性
@@ -20,7 +20,7 @@ epic: ".cs/epics/001-o-组会PPT与PX4资料搜集/spec.md"
 
 ## 归属
 
-- 隶属 epic：`.cs/epics/001-o-组会PPT与PX4资料搜集/spec.md`
+- 隶属 epic：`.cs/epics/001-x-组会PPT与PX4资料搜集/spec.md`
 - 相关 spec：`.cs/spec/index.md`、`references/PX4-Autopilot/docs/en/`（simulation / dev_setup 章节）
 
 ## 背景与证据
@@ -47,9 +47,11 @@ epic: ".cs/epics/001-o-组会PPT与PX4资料搜集/spec.md"
 
 ## 结论（2026-09-22 实测）
 
-**能跑**。仿真器 = Gazebo Classic 11.15.1，命令 `make px4_sitl gazebo`（v1.13.3 worktree 副本 `/root/px4-sitl-src`，WSL2 Ubuntu-20.04 原生）。已跑通 `commander takeoff` → `Landing detected` → `Disarmed by landing` 完整闭环，ULog 与截图现存 `presentation/assets/sitl/`（原 `.cs/evidence/sitl/`，2026-09-28 迁出）。细节与复现命令见 `.cs/notes/004-PX4仿真SITL路径.md`。
+**能跑**。仿真器 = Gazebo Classic 11.15.1，命令 `make px4_sitl gazebo`（v1.13.3 worktree 副本 `/root/px4-sitl-src`，WSL2 Ubuntu-20.04 原生）。已跑通 `commander takeoff` → `Landing detected` → `Disarmed by landing` 完整闭环，ULog 与截图现存 `presentation/组会-1/assets/sitl/`（原 `.cs/evidence/sitl/`，2026-09-28 迁出，2026-09-29 随组会场次目录重组再迁）。细节与复现命令见 `.cs/notes/004-PX4仿真SITL路径.md`。
 
-## 关闭回写
+## 关闭结论（2026-09-29）
 
-- notes：`.cs/notes/004-PX4仿真SITL路径.md`（已产出）
-- epic spec：勾掉对应 issue；若不能跑，更新"剩余阻碍"与 PPT 演示策略 → **已跑通**，剩余阻碍更新见 epic 与 `presentation/history/v1-simulation-assessment.md` 重新评估小节。
+- 判断：目标达成。确定结论"能跑"——Gazebo Classic 11.15.1 + PX4 v1.13.3 + WSL2，起飞-降落闭环实测通过（详见上文「结论（2026-09-22 实测）」）。
+- 验证：ULog、截图、控制台日志存 `presentation/组会-1/assets/sitl/`；复现命令与坑位备忘在 `.cs/notes/004-PX4仿真SITL路径.md`。
+- 回写位置：notes/004（已产出）；epic spec「剩余阻碍」已解除；证据索引见 `presentation/组会-1/process/02-evidence-and-assets.md` 的 M1b 条目。
+- 遗留事项：QGC↔WSL SITL 的 UDP 连通未实测（闭环用 pxh 控制台完成），留待后续需要时验证。

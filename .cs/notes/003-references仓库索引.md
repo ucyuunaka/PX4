@@ -20,7 +20,7 @@
 | | `PX4-containers` | 官方 `px4io/px4-dev-*` Docker 镜像的 Dockerfile 层级 |
 | | `PX4-windows-toolchain` | Windows Cygwin 工具链 MSI 打包工程（WiX；**2021 停更**，官方已转向 WSL2/Docker） |
 | | `PX4-user_guide` | **[已归档]** 旧文档仓库，README 明确内容已并入 `PX4-Autopilot/docs`；本地仅作历史快照 |
-| **自主规划 / 集群研究**（调研补充，见 `presentation/research/sources.md`） | `Fast-Drone-250` | ZJU-FAST-Lab 250mm 自主无人机全套方案（NUC+VINS-Fusion+Ego-Planner+px4ctrl）；**基于 fmu-v5 + PX4 v1.11**（README 明 v1.13 不适用），非本项目基线 |
+| **自主规划 / 集群研究**（调研补充，见 `presentation/组会-1/research/sources.md`） | `Fast-Drone-250` | ZJU-FAST-Lab 250mm 自主无人机全套方案（NUC+VINS-Fusion+Ego-Planner+px4ctrl）；**基于 fmu-v5 + PX4 v1.11**（README 明 v1.13 不适用），非本项目基线 |
 | | `Fast-Planner` | HKUST+ZJU 合著 kinodynamic+B-spline 规划框架，ego-planner/FUEL/RACER 上游基线；自带 8 个演示 GIF |
 | | `ego-planner` | ZJU-FAST-Lab 无 ESDF 梯度局部规划器（~1ms）；自带 4 个演示 GIF |
 | | `ego-planner-swarm` | EGO-Planner 集群版：去中心化异步多机导航（ICRA2021）；自带 5 个集群演示 GIF |
@@ -78,7 +78,7 @@
 - **多机 SITL 脚本**：v1.13.3 `Tools/gazebo_sitl_multiple_run.sh` 存在（无 ROS 的 Gazebo Classic 多机）；main 已删。`MAV_SYS_ID` 由 `rcS` 的 `px4_instance+1` 自动分配。
 - **MAVSDK 多机路由**：`docs/en/cpp/guide/connections.md`——`udpin://0.0.0.0:14540` 监听 → `subscribe_on_new_system()` → `systems()` 向量 → `get_system_id()` 区分目标。
 - **演示素材**：`ego-planner-swarm/pictures/`（5）、`Fast-Planner/files/`（8）、`ego-planner/pictures/`（4）含仓库自带演示 GIF，可作 PPT 集群/规划素材（标"开源项目官方演示"）。
-- 各仓库在调研素材池的取舍见 `presentation/research/sources.md`。
+- 各仓库在调研素材池的取舍见 `presentation/组会-1/research/sources.md`。
 
 ## 相关位置
 

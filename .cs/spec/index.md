@@ -9,14 +9,16 @@
 - 处于入门阶段：已有 PIX 2.4.8 克隆板（飞控）与 F450 机架，正在收集装机/调参/固件刷写资料。
 - QGC 已安装于 `U:\expro\QGroundControl\bin\QGroundControl.exe`（v5.0.3 master 构建，已验证可运行）；固件刷写走 QGC 在线下载，早期网盘资源已确认无需找回。
 - 项目当前是"资料 + 调参工作库"形态；尚无代码。本机已可跑 PX4 SITL 仿真（v1.13.3 + Gazebo Classic 11，WSL2），实测起飞-降落闭环通过。
-- 当前有一条进行中的工作线：组会 PPT 与 PX4 资料搜集（见 `.cs/epics/001-o-组会PPT与PX4资料搜集/spec.md`），面向组会，实物 bring-up 不在其边界内。PPT 内容稿 v2（20 页）已写完并逐页复核，素材集中在 `presentation/assets/`，工作区入口 `presentation/README.md`；下一步是制作 PPT 文件。
+- 第一次组会（2026-09-29）已圆满完成：《基于 PX4 的 F450 四旋翼平台：前期调研、单机调试路线与多机扩展规划》，成品与全部过程材料在 `presentation/组会-1/`（场次组织规范见 `presentation/README.md`）。对应工作线 epic 001 已关闭并毕业回写。
+- 下一阶段方向：实物 bring-up（装机、刷机、校准、首飞）与后续组会；二者目前均未立项。
 
 ## 能力地图
 
 - 入门资源索引：`.cs/notes/001-入门资源索引.md`（装机、调参、QGC 教程与官方下载渠道）
 - 本地文档查阅：`.cs/notes/002-PX4本地文档查阅.md`（PX4 与 QGC 官方文档离线版）
 - references 仓库索引：`.cs/notes/003-references仓库索引.md`（19 个本地 clone 的用途、活跃度与版本基线适配，含调研补充的 6 个外部开源项目）
-- **本机 SITL 仿真路径**：`.cs/notes/004-PX4仿真SITL路径.md`（WSL2 + Gazebo Classic 11 跑通起飞-降落闭环的确定结论、环境前提、复现命令与坑位备忘）；实测证据在 `presentation/assets/sitl/`
+- **本机 SITL 仿真路径**：`.cs/notes/004-PX4仿真SITL路径.md`（WSL2 + Gazebo Classic 11 跑通起飞-降落闭环的确定结论、环境前提、复现命令与坑位备忘）；实测证据在 `presentation/组会-1/assets/sitl/`
+- 组会汇报工作区：`presentation/`（按场次组织，规范与场次索引见其 README；组会-1 的材料含可复用的证据索引与调研核查表）
 - 草稿收件箱：`inbox.md`（未整理内容暂存，整理后分流到 `.cs/`）
 
 ## 使用路径
@@ -41,7 +43,7 @@
 
 - 想理解项目当前在做什么：读本文件「当前状态与重点」
 - 想找教程和资源链接：读 `.cs/notes/001-入门资源索引.md`
-- 想找本地已有的开源仓库/调研素材：读 `.cs/notes/003-references仓库索引.md` 与 `presentation/research/sources.md`
+- 想找本地已有的开源仓库/调研素材：读 `.cs/notes/003-references仓库索引.md` 与 `presentation/组会-1/research/sources.md`
 - 想做或改组会 PPT：读 `presentation/README.md`
 - 想看待办事项：读 `.cs/issues/`
 
@@ -63,5 +65,5 @@
 - 入门教程与官方下载渠道汇总：`.cs/notes/001-入门资源索引.md`
 - 本地文档查阅方式：`.cs/notes/002-PX4本地文档查阅.md`
 - 失效资源核查结论（已关闭）：`.cs/issues/001-x-找回调参与QGC资源.md`
-- 本机 SITL 仿真闭环证据：`presentation/assets/sitl/`（2 个 ULog + 控制台 log + 2 张 Gazebo 截图；放在 presentation 下便于 PPT 引用）
-- 进行中的组会资料搜集线：`.cs/epics/001-o-组会PPT与PX4资料搜集/spec.md`
+- 本机 SITL 仿真闭环证据：`presentation/组会-1/assets/sitl/`（2 个 ULog + 控制台 log + 2 张 Gazebo 截图；放在组会场次目录下便于 PPT 引用）
+- 已关闭的组会资料搜集线：`.cs/epics/001-x-组会PPT与PX4资料搜集/spec.md`（2026-09-29 关闭；毕业候选中的版本基线与检索原则已并入上文「关键考量」，SITL 可用性结论见「当前状态与重点」）
