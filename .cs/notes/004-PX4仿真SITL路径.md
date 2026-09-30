@@ -35,10 +35,11 @@
 - WSLg 可用：`DISPLAY=:0`、`WAYLAND_DISPLAY=wayland-0` → Gazebo GUI 直接显示到 Windows 桌面，无需额外 X server。
 - 关键依赖：`gazebo11 + libgazebo11-dev`、cmake/ninja/gcc-9、openjdk-13+ant（jmavsim 备用）、`empy==3.3.4`（**必须钉 3.3.x**，4.x 删了 `em.RAW_OPT` 会让 mavlink 代码生成炸）。
 - 子模块走 `ghfast.top` 镜像（github 直连超时）。
+- **网络（2026-09-30 核对）**：WSL 目前运行在 virtioproxy 回退模式，WSL 内部 UDP 连 127.0.0.1 默认不通。PX4↔Gazebo 用的是固定端口 TCP 4560，不受影响；MAVROS/MAVSDK/XRCE 用的 UDP 端口已经由 `wsl-loopback-fix.sh` 补上。详见 note 005「网络」。
 
 ## 五、QGC 连通（两条候选，先通者为准）
 
-- (a) Windows `U:\expro\QGroundControl\bin\QGroundControl.exe`（v5.0.3）经 UDP 连 WSL IP——注意 WSL2 NAT 不通广播，需 SITL 端 `MAV_BROADCAST=1` 或在 QGC 手动加 Comm Link 指向 WSL IP:14550。
+- (a) Windows `U:\expro\QGroundControl\bin\QGroundControl.exe`（v5.0.3）经 UDP 连 SITL。**当前是 virtioproxy 模式**，WSL 发往 127.0.0.1 的 UDP 会送到 Windows，而 PX4 默认发往 127.0.0.1:14550，所以 Windows 上的 QGC 理论上不用额外配置就能收到（未实测）。如果以后恢复成 NAT 模式（issue 007），就改成：SITL 端设 `MAV_BROADCAST=1`，或让 PX4 发往 Windows 宿主 IP，或在 QGC 里手动加一条指向 WSL IP:14550 的 Comm Link。
 - (b) WSL 内跑 QGC AppImage 走 WSLg。
 - 备注：本次闭环用 `pxh>` 内置控制台完成（无需 QGC 即可演示起飞-降落）；QGC 连通属"锦上添花"的可视化项，不阻塞结论。
 

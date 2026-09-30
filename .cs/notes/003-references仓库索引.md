@@ -2,7 +2,7 @@
 
 ## 结论
 
-`references/` 目前共 **19 个仓库 clone**（13 个官方栈 + 6 个调研补充的外部开源项目；官方栈经 ghfast.top 镜像自 github.com，外部项目 remote 均已核对指向正确上游）。按用途分五组：
+`references/` 目前共 **20 个仓库 clone**：13 个官方栈，6 个调研补充的外部开源项目，1 个课程作业仓（2026-09-29 加入）。官方栈都是经 ghfast.top 镜像从 github.com 拉的；外部项目的 remote 都已核对，指向正确的上游。按用途分组如下：
 
 | 分组 | 仓库 | 一句话用途 |
 |---|---|---|
@@ -25,6 +25,7 @@
 | | `ego-planner` | ZJU-FAST-Lab 无 ESDF 梯度局部规划器（~1ms）；自带 4 个演示 GIF |
 | | `ego-planner-swarm` | EGO-Planner 集群版：去中心化异步多机导航（ICRA2021）；自带 5 个集群演示 GIF |
 | | `mavsdk_drone_show` | MAVSDK-Python 多机 fleet ops（灯光秀轨迹回放/leader-follower/SITL）；自述 demo/beta |
+| **课程作业** | `MASC-2026-bonus-homework` | SYSU-HILAB 集群控制附加作业：在 ZJU-FAST-Lab **Swarm-Formation** 上做编队飞行仿真，依次变换 S/Y/S/U 队形并避障（`roslaunch ego_planner normal_hexagon.launch`）。**基于 ROS1 Noetic**（Dockerfile 用 `osrf/ros:noetic-desktop-full`）→ 在 WSL `Ubuntu-20.04` 上跑（见 note 005）。README 规定：不要改 `map_generator` 及其 launch 参数；需提交 `results/demo.gif` 和 `results/report.pdf`；提交前跑 `check_completeness.sh` |
 
 ## 触发场景
 
@@ -49,12 +50,14 @@
 - `PX4-containers` — `2025-02-10`（2025-02-12，含 Noble）
 - `PX4-windows-toolchain` — `v1.0-1`（**2021-03-14，停更**）
 - `PX4-user_guide` — 无 tag（main，2026-04-18 自动同步，**已归档只读**）
+- `MASC-2026-bonus-homework` — `5cf54cf`（2026-07-04）。父仓里是以 gitlink 形式提交的，没有 `.gitmodules` 条目；remote 的 fetch 走 ghfast.top，push 走原始 github.com
 
 ### 与版本基线（v1.13.x）/ 板型（fmu-v2）的适配关系
 
 - **ROS 2 桥接与 fmu-v2 不匹配**：`px4_msgs`/`px4_ros_com`/`Micro-XRCE-DDS-Agent` 走的是 uXRCE-DDS（`uxrce_dds_client` 模块）。该模块默认 `default n`，且需启用板自行打开——fmu-v2（2.4.8，`CONSTRAINED_FLASH/MEMORY=y`）所有变体在 v1.13.3 与 main 上**均未启用** RTPS/DDS 客户端。官方在 v1.13 给 RTPS 出 `rtps.px4board` 变体的板均为 fmu-v5/v5x/fmuk66/pixracerpro 等更大 flash 板。→ 2.4.8 实机暂不能走 DDS/ROS 2；多机/offboard 若需 ROS 2，须换受支持板或走 MAVLink。
 - **`micrortps_agent` 是遗产**：对应 PX4 `micrortps_bridge`（v1.13 尚存、main 已移除），配合旧 `micrortps_client`。仅存档参考；新工作用 uXRCE-DDS 一组。
 - **`px4_msgs` 版本号 = PX4 发布线**：头文件注明由 PX4-Autopilot uORB 定义自动同步；查消息定义时注意 tag（本地 HEAD 对齐 v1.17，与 v1.13 基线有差异）。
+- **WSL 22.04 的 ROS 2 工作区用的是同一批源码**：`~ucy/ros2_ws` 的 `px4_msgs` 与本地 `references/px4_msgs` 是同一提交 72fcfaa，`px4_ros_com` 是 main 86e9aeb，已编译通过。它和 v1.13.3 SITL 不对接，原因见 note 005「版本对齐」。当前 `SensorGps.msg` 里仍有 `heading` 字段，并没有被改名。
 
 ### 日志分析链（单机调试直接可用）
 
@@ -87,3 +90,4 @@
 - `.cs/issues/001-x-找回调参与QGC资源.md` — 用 `PX4-Bootloader/board_types.txt` 核对板型映射的实例
 - `.cs/spec/index.md` — 版本基线 v1.13.x 与"官方为权威"原则
 - `.cs/issues/004`/`005` — SITL 与多机/ROS 2 检索，直接消费本索引中的桥接与容器仓
+- `.cs/notes/005-WSL-ROS环境.md` — 本地这些桥接件在 WSL 中的实际安装与版本
