@@ -1,6 +1,8 @@
-# HANDOFF — 组会-1 已完成；WSL ROS 双环境（Noetic + Humble）已配好（2026-09-29）
+# HANDOFF — 组会-1 已完成；WSL ROS 双环境（Noetic + Humble）已配好；WSL 网络已打补丁、待根治（2026-09-30）
 
-写给一个没有上文的新会话。客观记录。最后更新 2026-09-29（晚）。
+写给一个没有上文的新会话。客观记录。最后更新 2026-09-30。
+
+> **WSL 环境的权威记录以 `.cs/notes/005-WSL-ROS环境.md` 为准**（2026-09-30 按实机重写）。下文「WSL ROS 环境」一节保留的是搭建过程流水，与 note 005 冲突时以 note 005 为准。
 
 ## 当前状态
 
@@ -8,14 +10,16 @@
 - WSL 现有发行版：`Ubuntu-20.04`（默认用户 **root**，另有 ucy 用户）、`Ubuntu-22.04`（默认用户 **ucy**，另有 root）、`docker-desktop`。
 - **ROS 双环境已于 2026-09-29 配置完成并验证**：Ubuntu-20.04 + ROS Noetic（面向 ego-planner / Fast-Planner / Fast-Drone-250），Ubuntu-22.04 + ROS2 Humble（面向 px4_msgs / px4_ros_com / Micro-XRCE-DDS-Agent）。详见下文「WSL ROS 环境」节。
 - **第一次组会（2026-09-29）已讲完**：题目《基于 PX4 的 F450 四旋翼平台：前期调研、单机调试路线与多机扩展规划》，成品 `presentation/组会-1/组会-1.pptx`。
-- 组会工作线已全部关闭：epic `.cs/epics/001-x-组会PPT与PX4资料搜集/`（closed，毕业回写已做）与 issue 001–006（全部 `-x-`）。当前**没有进行中的 issue/epic**。
+- 组会工作线已全部关闭：epic `.cs/epics/001-x-组会PPT与PX4资料搜集/`（closed，毕业回写已做）与 issue 001–006（全部 `-x-`）。
+- **进行中**：issue `007-o-修复WSL-Windows层网络`。WSL 自 2026-09-27 起一直运行在 virtioproxy 回退模式，NAT 起不来。需要用户用管理员权限按 issue 里的步骤操作；做完后让 AI 按 issue 文末整理文档。已做的补丁与核对记录在 `008-x-ff-wsl-loopback-and-mirror-cleanup`。
+- WSL 不一定是长期基座，后续可能换原生 Ubuntu。
 - 下一阶段方向（均未立项，等用户发起）：实物 bring-up（装机/刷机/校准/首飞）；后续组会（按 `presentation/README.md` 的场次规范新建 `组会-2/`）；Vision 正式整理（多机协同构想输入已备妥，见 epic 001 关闭回写）。
 
 ## 工作区结构
 
 - `presentation/`：组会汇报工作区，**按场次组织**（`组会-N/` 自包含：pptx、process/、assets/、research/、ori_ppt/、history/），规范与场次索引在 `presentation/README.md`。PPT 制作一律走 ppt-master 流程（`U:\ucy\Code\reference\ppt-master`）。
 - `presentation/组会-1/process/04-final-slide-outline.md` 是组会-1 内容主稿（20 页）；`02-evidence-and-assets.md` 是证据索引；`../research/sources.md` 是外部素材核查表——后续 bring-up 与下场组会可复用。
-- `.cs/`：CodeStable 制度记忆。`spec/index.md` 是项目当前真相；`notes/001–004` 是资源索引/文档查阅/仓库索引/SITL 复现路径；`inbox.md` 是草稿暂存区。
+- `.cs/`：CodeStable 制度记忆。`spec/index.md` 是项目当前真相；`notes/001–005` 依次是资源索引、文档查阅、仓库索引、SITL 复现路径、WSL ROS 环境与网络；`inbox.md` 是草稿暂存区。
 - SITL 证据：`presentation/组会-1/assets/sitl/`（截图、ULog、pyulog 曲线、控制台日志）。画 ULog 曲线：`references/pyulog` 未 pip 安装，用 `PYTHONPATH=references/pyulog` + Windows Anaconda（`/u/expro/anaconda3/python`）直接导入；ULog 时间戳 uint64，相减前先转 int64。
 - SITL 已在本机跑通（v1.13.3 + Gazebo Classic 11.15.1，WSL2）；仿真进程目前未运行。
 
@@ -35,19 +39,20 @@
 
 - ROS2 Humble desktop（282 包，`/opt/ros/humble`）；ROS2 apt 源腾讯镜像；colcon 已装；基础工具 vim/htop/tmux/net-tools/unzip 已装。
 - 用户 ucy（uid 1000，sudo 组，**密码与 20.04 的 ucy 相同**——整行复制 `/etc/shadow` 的 ucy 行实现）；`/etc/wsl.conf` 已设 `[user] default=ucy`，默认登录 ucy。ucy 的 `~/.bashrc` 已追加 humble + `~/ros2_ws/install/setup.bash` 条件 source。
-- **Micro-XRCE-DDS-Agent** 已从源码（superbuild，`/tmp/Micro-XRCE-DDS-Agent/build`）`make install` 到 `/usr/local`；`MicroXRCEAgent udp4 -p 8888` 实测可启动。
+- **Micro-XRCE-DDS-Agent v2.4.2** 已从源码（superbuild，`/tmp/Micro-XRCE-DDS-Agent/build`）`make install` 到 `/usr/local`；`MicroXRCEAgent udp4 -p 8888` 实测可启动。源码在 `/tmp` 下可能被清。PX4 官方文档主推 v2.4.3。
 - `~/ros2_ws`（ucy）：`px4_msgs` 检出在 **72fcfaa**（2026-09-16，与 `references/px4_msgs` 同一提交，对应 `references/PX4-Autopilot` main 的 v1.18.0-beta1 时期）+ `px4_ros_com` main（86e9aeb，2024-03-10，上游最新即此）；`colcon build` 两包均通过。
 - rosdep 同样走 USTC 镜像，root/ucy 已更新。验证：`ros2 run demo_nodes_cpp talker` 正常发布，`ros2 pkg list` 可见 px4_msgs/px4_ros_com。
-- 残留：`/root/ros2_ws`（前一会话 root 下的旧实验工作区，px4_msgs 为 main HEAD），已无用，可删。
+- `/root/ros2_ws`（前一会话留下的 root 下旧实验工作区）已于 2026-09-30 删除。20.04 的 rosdepc 也已卸载，rosdep 统一走 USTC 镜像。
 
 ### ROS 环境踩过的坑（不要再踩）
 
 - **raw.githubusercontent.com 在本网络下 HEAD 能通（301）、GET 持续超时**：rosdep 官方源不可用。TUNA `github-raw` 镜像已 403 失效。**可用方案**：USTC `https://mirrors.ustc.edu.cn/rosdistro/` 镜像——手写 `/etc/ros/rosdep/sources.list.d/20-default.list`（把 raw.githubusercontent.com/ros/rosdistro/master 替换为该镜像路径），并把 `rosdistro/__init__.py` 的 `DEFAULT_INDEX_URL` 改为 `https://mirrors.ustc.edu.cn/rosdistro/index-v4.yaml`（USTC 的 index-v4.yaml 里 distribution 是相对路径，会自动落到镜像）。
 - **noetic 已 EOL，`rosdep update` 默认跳过**（输出 `Skip end-of-life distro "noetic"`），导致 `rosdep resolve catkin` 报 "no rosdep rule"。必须加 `--include-eol-distros`。
-- **px4_ros_com 上游 main 停在 2024-03-10**：其示例 `vehicle_gps_position_listener.cpp` 引用了新版 `SensorGps.msg` 已删除的 `heading`/`heading_offset` 字段，与 px4_msgs main 直接编译冲突。本次删掉了该示例中这两行打印（ucy 工作区副本，`~/ros2_ws/src/px4_ros_com/...` 第 81-82 行原位置）。px4_msgs 不要回退到 2024-03 去迁就它——那会与 PX4-Autopilot main 的消息定义脱节。
+- **px4_ros_com 上游 main 停在 2024-03-10**。当时以为它的示例 `vehicle_gps_position_listener.cpp` 用到的 `heading`/`heading_offset` 字段已被新版 `SensorGps.msg` 删除，就删掉了示例里这两行打印（ucy 工作区副本，第 81–82 行）。**2026-09-30 核对：这个判断不成立**，72fcfaa 的 `SensorGps.msg` 里这两个字段仍在，那两行其实没必要删，但删了也无害。px4_msgs 不要回退到 2024-03 去迁就 px4_ros_com，否则会和 PX4-Autopilot main 的消息定义脱节。
 - **px4_msgs 浅克隆（depth 1）无历史**：`git fetch --unshallow` 经 `gh-proxy.com` 远程补全后成功（该代理拉历史很快）。
 - **Git Bash 调 `wsl.exe` 的 MSYS 参数转换会吃掉以 `/` 开头的参数**（`/mnt/u/...`、`/home/...` 被转成 `U:/Program Files/Git/...`；sed 表达式 `/pattern/d` 也会被转）。解法：调用前加 `MSYS2_ARG_CONV_EXCL='*'`，或把命令写进脚本文件再执行。经 wsl.exe 传参时 `$VAR`/`$()` 也有被提前展开/吞掉的风险，含密码哈希（含 `$`）等敏感串不要走命令行——本次同步密码是先在 20.04 里把 shadow 行写到 `/mnt/u` 临时文件、再在 22.04 里读文件整行替换 `/etc/shadow`，两端 md5 核对一致。
 - **WSL 非交互 shell 不加载 `.bashrc` 末尾追加的 source 行**（交互检查提前 return）：脚本里用 ROS 命令必须显式 `source /opt/ros/<distro>/setup.bash`。
+- **WSL 网络处于 virtioproxy 回退模式（2026-09-30 查明）**：WSL 内部 UDP 连 127.0.0.1 不通，TCP 连 127.0.0.1 只有固定端口能通。已给两个发行版加开机补丁 `/usr/local/sbin/wsl-loopback-fix.sh`（由 `/etc/wsl.conf` 的 `[boot]` 调用），放行 PX4 相关的 UDP 端口。回环矩阵、影响范围和根治步骤见 note 005 与 issue 007。**不要随手 `wsl --shutdown`**，它会同时停掉 Docker Desktop 里用户的 6 个容器。
 
 ## 组会 PPT 的引用边界（后续场次沿用）
 
@@ -112,5 +117,7 @@
 - 源 worktree：`references/PX4-Autopilot/.cs/env/px4-sitl-v1.13.3`（v1.13.3，子模块已 init 含递归）
 - 编译副本+产物：WSL `/root/px4-sitl-src`（二进制 `build/px4_sitl_default/bin/px4`）；启动器 `/root/px4-build/run_gazebo2.sh`（仓库副本 `.cs/env/run_gazebo.sh`）；pxh 命令注入 FIFO `/root/px4-build/pxh_in`；日志 `/root/px4-build/gazebo.log`
 - ROS 工作区：Ubuntu-20.04 `~ucy/catkin_ws`（空 src，已构建）；Ubuntu-22.04 `~ucy/ros2_ws`（px4_msgs 72fcfaa + px4_ros_com，已构建）；MicroXRCEAgent 在 22.04 `/usr/local/bin/`
+- WSL 回环补丁：两个发行版的 `/usr/local/sbin/wsl-loopback-fix.sh`（仓库副本 `.cs/env/wsl-loopback-fix.sh`）
+- 课程作业仓：`references/MASC-2026-bonus-homework`（Swarm-Formation 编队仿真，ROS1 Noetic，见 note 003）
 - `.cs/env/setup_submodules.sh`、`install_deps.sh` 是早期版本（缺 bridge 子模块、pymavlink、empy 钉版），脚本头已注明，勿直接照跑
 - `.cursor/plans/..._ae3f360f.plan.md`：260922→260929 的 SITL 恢复计划，已执行完；其中 todo 状态未回填，只作历史
