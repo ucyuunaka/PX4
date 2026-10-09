@@ -2,15 +2,15 @@
 kind: issue
 title: "修复 WSL 的 Windows 层网络（virtioproxy → NAT）"
 type: chore
-status: open
+status: closed
 created: 2026-09-30
+closed: 2026-10-09
 epic: ""
 ---
 
 # 修复 WSL 的 Windows 层网络（virtioproxy → NAT）
 
-> **待用户执行**：需要管理员权限，可能要重启电脑，AI 无法代做。做完后让 AI 按文末「完成后交给 AI 的事」整理文档并关闭本 issue。
-> 如果决定改用原生 Ubuntu、不再以 WSL 为基座，本 issue 可直接以"不再需要"关闭。
+> **已解决（2026-10-09）**：根因是 Windows 防火墙服务 `mpssvc` 被禁用，HNS 建不了 NAT 网络。恢复服务 + 关闭防火墙配置文件后 WSL 已回到 `nat` 模式。过程见文末「关闭结论」；下方操作指引保留作历史。
 
 ## 目标
 
@@ -106,4 +106,14 @@ wsl --install --no-distribution
 
 ## 关闭结论
 
-（待填）
+2026-10-09 修复完成，`wslinfo --networking-mode` 两个发行版均输出 `nat`。
+
+**根因**：Windows Defender Firewall 服务 `mpssvc` 早前被用户按网上教程禁用（注册表 `Start=4`）。HNS 创建 WSL 的 ICS/NAT 网络时要靠它加防火墙规则；服务一停，`HNS-Network-Create 网络类型='ICS'` 返回 `0x800706D9`，WSL 每次启动都回退到 virtioproxy（至少自 2026-09-27）。先前报的"不支持镜像网络模式"很可能同一根因（mirrored 需要 Hyper-V 防火墙）——未实测，按大概率记。
+
+**试了但无效**（均在上面「操作指引」内）：step 1 把 ucy 加入 Hyper-V Administrators（SID `S-1-5-32-578`）并重启；step 2 `Restart-Service hns`；step 3 `wsl --update`（下载被 403 拦，`Wsl/UpdatePackage/0x80190193`，WSL 已是 2.6.3）+ `wsl --install --no-distribution` + 重启。之后仍是 virtioproxy。
+
+**起效的修法**：`Set-Service`/`sc config` 改 mpssvc 被拒（服务 DACL 不给管理员组改配置，属正常保护），管理员改用 `reg add "HKLM\SYSTEM\CurrentControlSet\Services\mpssvc" /v Start /t REG_DWORD /d 2 /f` 恢复为自动启动 → 重启 → mpssvc Running → `Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False`（用户选择继续不要防火墙过滤；这是微软文档里关防火墙的正确姿势：关配置文件、保留服务运行，参考 configure-with-command-line 文档；microsoft/WSL#10709 也报告禁用防火墙会触发此问题）→ `wsl --shutdown` → 回 `nat`。
+
+**验证结果**：两个发行版 `nat`；Windows 出现 `vEthernet (WSL (Hyper-V firewall))` 172.29.160.1/20；WSL eth0 172.29.171.4/20，默认网关 172.29.160.1（与 HKCU Lxss `NatIpAddress` 一致）；两发行版 UDP 127.0.0.1:45999 回环测试打印 `(b'ok', ...)`，TCP 临时端口回环也通；`ip rule` 只剩默认 3 条（`wsl-loopback-fix.sh` 在 NAT 下自动空转，已验证，保留安装）；腾讯镜像与 gh-proxy.com 均 HTTP 200；resolv.conf 仍是 223.5.5.5 / 119.29.29.29。NAT 下 SITL 复验通过（见 ff 009）。Docker Desktop 恢复情况**未验证**（用户稍后自行重开）。
+
+**以后别再踩**：不要停止/禁用 `mpssvc`；要关防火墙就关配置文件（`Set-NetFirewallProfile ... -Enabled False`），服务必须保持运行。

@@ -21,7 +21,7 @@ epic: ""
 - `.cs/env/wsl-loopback-fix.sh`：补丁脚本的仓库副本。
 - `.cs/notes/005-WSL-ROS环境.md`：按实测重写。
 - `.cs/notes/003`、`.cs/notes/004`、`.cs/spec/index.md`、`HANDOFF.md`：同步相关内容。
-- `.cs/issues/007-o-修复WSL-Windows层网络.md`：根治步骤的指引，待用户执行。
+- `.cs/issues/007-x-修复WSL-Windows层网络.md`：根治步骤的指引（当时待用户执行；2026-10-09 已关闭）。
 
 ## 怎么验证的
 
