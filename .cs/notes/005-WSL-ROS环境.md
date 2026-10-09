@@ -61,7 +61,7 @@
 - **PX4 v1.13.3 SITL ↔ Gazebo**：TCP 4560 走 127.0.0.1 直连正常——2026-10-09 复验，不带绕路环境变量时 `PX4 SIM HOST: localhost`、连接成功并完整起飞降落。启动器里的 `GAZEBO_IP`/`PX4_SIM_HOST_ADDR`（绕 eth0 IP）已不需要，NAT 下无害，保留。见 ff 009。
 - **MAVROS / MAVSDK / XRCE Agent**：127.0.0.1 的 UDP 默认就通，不再需要补丁（端口级验证，未带真实程序实跑）。
 - **ROS 2 DDS**：`demo_nodes_cpp talker` 能发布；listener 收包**未确认**（用户决定暂不继续验证）。
-- **Windows QGC 连 WSL 里的 SITL**：NAT 下 PX4 发往 127.0.0.1:14550 的 UDP 只留在 WSL 内部，**QGC 收不到**。候选：QGC 手动加 Comm Link（UDP）指向 WSL eth0 IP:14550；或让 PX4 的 mavlink 发到网关 IP；或设 `MAV_BROADCAST=1`。均**未实测**，详见 note 004 §五。
+- **Windows QGC 连 WSL 里的 SITL**：NAT 下 PX4 发往 127.0.0.1:14550 的 UDP 只留在 WSL 内部，QGC 直接收不到；**已验证的做法**：pxh `mavlink start -u 14557 -r 4000000 -t <网关IP> -o 14550`，QGC 默认监听自动发现，双向通（issue 011-x；`demos/lib/common.sh` 的 `gcs_link_to_windows`）。备选未实测：QGC 手动 Comm Link 指 WSL eth0 IP:14550；`MAV_BROADCAST=1`。详见 note 004 §五。
 
 ### DNS / IPv6 / 代理
 

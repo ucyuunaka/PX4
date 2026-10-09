@@ -39,7 +39,7 @@
 
 ## 五、QGC 连通（两条候选，先通者为准）
 
-- (a) Windows `U:\expro\QGroundControl\bin\QGroundControl.exe`（v5.0.3）经 UDP 连 SITL。**当前是 NAT 模式**（2026-10-09 起）：PX4 默认发往 127.0.0.1:14550 的 UDP 只留在 WSL 内部，Windows 上的 QGC 直接收不到。候选做法：在 QGC 里手动加一条 Comm Link（UDP）指向 WSL eth0 IP:14550（`hostname -I` 取 IP）；或 SITL 侧让 mavlink 发到默认网关 IP（`ip route | awk '/default/{print $3}'`，即 Windows 侧 vEthernet）；或设 `MAV_BROADCAST=1`。均**未实测**。
+- (a) Windows `U:\expro\QGroundControl\bin\QGroundControl.exe`（v5.0.3）经 UDP 连 SITL。**当前是 NAT 模式**（2026-10-09 起）：PX4 默认发往 127.0.0.1:14550 的 UDP 只留在 WSL 内部，Windows 上的 QGC 直接收不到。**已验证的做法（issue 011-x）**：pxh 里 `mavlink start -u 14557 -r 4000000 -t <默认网关IP> -o 14550`（网关 IP 用 `ip route | awk '/default/{print $3}'` 现取，即 Windows 侧 vEthernet；不传 `-m`），QGC 默认监听 14550 自动发现，已实测双向通、可下发起飞；封装为 `demos/lib/common.sh` 的 `gcs_link_to_windows`。备选（未实测）：QGC 手动加 Comm Link 指 WSL eth0 IP:14550；`MAV_BROADCAST=1`。
 - (b) WSL 内跑 QGC AppImage 走 WSLg。
 - 备注：本次闭环用 `pxh>` 内置控制台完成（无需 QGC 即可演示起飞-降落）；QGC 连通属"锦上添花"的可视化项，不阻塞结论。
 
@@ -80,4 +80,5 @@ commander land
 - issue 004 已完成：确定结论"能跑，Gazebo Classic 11"并拿到闭环证据。
 - **2026-10-09 复验**（WSL 恢复 NAT 后）：headless（`HEADLESS=1`）起飞-降落-上锁闭环通过；不带 `GAZEBO_IP`/`PX4_SIM_HOST_ADDR` 的纯净启动也能跑通（`PX4 SIM HOST: localhost`），绕路不再需要。日志 `/root/px4-build/sitl_verify_nat.log` 与 `sitl_verify_nat_plain.log`，细节见 ff 009。
 - PPT 第 2、12 页使用本机实测截图/日志（标注"本机 SITL 实测，非实机"）。
-- 未做：QGC 连 SITL、多机 SITL（`Tools/gazebo_sitl_multiple_run.sh`）。
+- 已做（2026-10-09）：QGC 连 SITL（网关 IP 链路，issue 011-x；演示 B `demos/B-地面站联动/`）。
+- 未做：多机 SITL（进行中，issue 012；参考 `Tools/gazebo_sitl_multiple_run.sh`）。
