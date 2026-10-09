@@ -1,8 +1,8 @@
-# HANDOFF — 组会-1 已完成；WSL ROS 双环境（Noetic + Humble）已配好；WSL 网络已打补丁、待根治（2026-09-30）
+# HANDOFF — 组会-1 已完成；WSL ROS 双环境（Noetic + Humble）已配好；WSL 网络已恢复 NAT（2026-10-09）
 
-写给一个没有上文的新会话。客观记录。最后更新 2026-09-30。
+写给一个没有上文的新会话。客观记录。最后更新 2026-10-09。
 
-> **WSL 环境的权威记录以 `.cs/notes/005-WSL-ROS环境.md` 为准**（2026-09-30 按实机重写）。下文「WSL ROS 环境」一节保留的是搭建过程流水，与 note 005 冲突时以 note 005 为准。
+> **WSL 环境的权威记录以 `.cs/notes/005-WSL-ROS环境.md` 为准**（2026-10-09 已更新为 NAT 现状）。下文「WSL ROS 环境」一节保留的是搭建过程流水，与 note 005 冲突时以 note 005 为准。
 
 ## 当前状态
 
@@ -11,9 +11,9 @@
 - **ROS 双环境已于 2026-09-29 配置完成并验证**：Ubuntu-20.04 + ROS Noetic（面向 ego-planner / Fast-Planner / Fast-Drone-250），Ubuntu-22.04 + ROS2 Humble（面向 px4_msgs / px4_ros_com / Micro-XRCE-DDS-Agent）。详见下文「WSL ROS 环境」节。
 - **第一次组会（2026-09-29）已讲完**：题目《基于 PX4 的 F450 四旋翼平台：前期调研、单机调试路线与多机扩展规划》，成品 `presentation/组会-1/组会-1.pptx`。
 - 组会工作线已全部关闭：epic `.cs/epics/001-x-组会PPT与PX4资料搜集/`（closed，毕业回写已做）与 issue 001–006（全部 `-x-`）。
-- **进行中**：issue `007-o-修复WSL-Windows层网络`。WSL 自 2026-09-27 起一直运行在 virtioproxy 回退模式，NAT 起不来。需要用户用管理员权限按 issue 里的步骤操作；做完后让 AI 按 issue 文末整理文档。已做的补丁与核对记录在 `008-x-ff-wsl-loopback-and-mirror-cleanup`。
+- **WSL 网络已根治（2026-10-09，issue `007-x` 关闭）**：根因是 Windows 防火墙服务 `mpssvc` 曾被禁用，HNS 建 NAT 失败使 WSL 自 2026-09-27 起回退 virtioproxy；恢复服务 + 关防火墙配置文件后回到 `nat`。**注意**：`mpssvc` 必须保持运行，要关防火墙只能关配置文件（`Set-NetFirewallProfile -Enabled False`）。NAT 下 SITL 已 headless 复验通过（`009-x-ff-SITL-virtioproxy绕路与NAT恢复后复验`）。Docker Desktop 恢复情况待用户重开确认。
 - WSL 不一定是长期基座，后续可能换原生 Ubuntu。
-- 下一阶段方向（均未立项，等用户发起）：实物 bring-up（装机/刷机/校准/首飞）；后续组会（按 `presentation/README.md` 的场次规范新建 `组会-2/`）；Vision 正式整理（多机协同构想输入已备妥，见 epic 001 关闭回写）。
+- 下一阶段方向（均未立项，等用户发起）：实物 bring-up（装机/刷机/校准/首飞）；后续组会（按 `presentation/README.md` 的场次规范新建 `组会-2/`）；Vision 正式整理（多机协同构想输入已备妥，见 epic 001 关闭回写）。组会-2 计划做仿真现场演示：A 单机起降 / B QGC 联动 / C 多机 SITL / D MASC 编队，各配一键脚本——目前仅规划，尚未开始做。
 
 ## 工作区结构
 
@@ -52,7 +52,7 @@
 - **px4_msgs 浅克隆（depth 1）无历史**：`git fetch --unshallow` 经 `gh-proxy.com` 远程补全后成功（该代理拉历史很快）。
 - **Git Bash 调 `wsl.exe` 的 MSYS 参数转换会吃掉以 `/` 开头的参数**（`/mnt/u/...`、`/home/...` 被转成 `U:/Program Files/Git/...`；sed 表达式 `/pattern/d` 也会被转）。解法：调用前加 `MSYS2_ARG_CONV_EXCL='*'`，或把命令写进脚本文件再执行。经 wsl.exe 传参时 `$VAR`/`$()` 也有被提前展开/吞掉的风险，含密码哈希（含 `$`）等敏感串不要走命令行——本次同步密码是先在 20.04 里把 shadow 行写到 `/mnt/u` 临时文件、再在 22.04 里读文件整行替换 `/etc/shadow`，两端 md5 核对一致。
 - **WSL 非交互 shell 不加载 `.bashrc` 末尾追加的 source 行**（交互检查提前 return）：脚本里用 ROS 命令必须显式 `source /opt/ros/<distro>/setup.bash`。
-- **WSL 网络处于 virtioproxy 回退模式（2026-09-30 查明）**：WSL 内部 UDP 连 127.0.0.1 不通，TCP 连 127.0.0.1 只有固定端口能通。已给两个发行版加开机补丁 `/usr/local/sbin/wsl-loopback-fix.sh`（由 `/etc/wsl.conf` 的 `[boot]` 调用），放行 PX4 相关的 UDP 端口。回环矩阵、影响范围和根治步骤见 note 005 与 issue 007。**不要随手 `wsl --shutdown`**，它会同时停掉 Docker Desktop 里用户的 6 个容器。
+- **WSL 网络曾处于 virtioproxy 回退模式（2026-09-27~10-09，已根治）**：当时 WSL 内部 UDP 连 127.0.0.1 不通，TCP 只有固定端口能通；开机补丁 `/usr/local/sbin/wsl-loopback-fix.sh` 放行 PX4 相关 UDP 端口（NAT 下自动空转，仍保留）。根因与修法见 issue `007-x`，回环矩阵存档在 note 005。**不要随手 `wsl --shutdown`**，它会同时停掉 Docker Desktop 里用户的 6 个容器。
 
 ## 组会 PPT 的引用边界（后续场次沿用）
 

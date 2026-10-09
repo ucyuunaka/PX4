@@ -10,8 +10,9 @@
 - QGC 已安装于 `U:\expro\QGroundControl\bin\QGroundControl.exe`（v5.0.3 master 构建，已验证可运行）；固件刷写走 QGC 在线下载，早期网盘资源已确认无需找回。
 - 项目当前是"资料 + 调参工作库"形态；尚无代码。本机已可跑 PX4 SITL 仿真（v1.13.3 + Gazebo Classic 11，WSL2），实测起飞-降落闭环通过。
 - 第一次组会（2026-09-29）已圆满完成：《基于 PX4 的 F450 四旋翼平台：前期调研、单机调试路线与多机扩展规划》，成品与全部过程材料在 `presentation/组会-1/`（场次组织规范见 `presentation/README.md`）。对应工作线 epic 001 已关闭并毕业回写。
-- WSL 里已配好 ROS 双环境：`Ubuntu-20.04` 装 Noetic（兼作 SITL 主机），`Ubuntu-22.04` 装 Humble 加 PX4 ROS 2 桥接件。WSL 网络目前运行在 virtioproxy 回退模式，已打补丁，根治步骤待用户执行（issue 007）。WSL **不一定是长期基座**，后续可能换到原生 Ubuntu。
+- WSL 里已配好 ROS 双环境：`Ubuntu-20.04` 装 Noetic（兼作 SITL 主机），`Ubuntu-22.04` 装 Humble 加 PX4 ROS 2 桥接件。WSL 网络 2026-10-09 已恢复 `nat`（根因：Windows 防火墙服务 `mpssvc` 被禁用导致 HNS 建不了 NAT，详见 `.cs/issues/007-x-…`），NAT 下 SITL 已复验通过（ff 009）。WSL **不一定是长期基座**，后续可能换到原生 Ubuntu。
 - 下一阶段方向：实物 bring-up（装机、刷机、校准、首飞）与后续组会；二者目前均未立项。
+- 组会-2 计划做仿真现场演示：A 单机起降 / B QGC 联动 / C 多机 SITL / D MASC 编队，各配一键脚本——目前仅规划，尚未开始做。
 
 ## 能力地图
 
@@ -19,7 +20,7 @@
 - 本地文档查阅：`.cs/notes/002-PX4本地文档查阅.md`（PX4 与 QGC 官方文档离线版）
 - references 仓库索引：`.cs/notes/003-references仓库索引.md`（19 个本地 clone 的用途、活跃度与版本基线适配，含调研补充的 6 个外部开源项目）
 - **本机 SITL 仿真路径**：`.cs/notes/004-PX4仿真SITL路径.md`（WSL2 + Gazebo Classic 11 跑通起飞-降落闭环的确定结论、环境前提、复现命令与坑位备忘）；实测证据在 `presentation/组会-1/assets/sitl/`
-- **WSL ROS 环境与网络**：`.cs/notes/005-WSL-ROS环境.md`（两个发行版的用途与默认用户、virtioproxy 下的回环行为与补丁、镜像源与 git 代理，以及 v1.13.3 与 ROS 2 桥接的版本差距）
+- **WSL ROS 环境与网络**：`.cs/notes/005-WSL-ROS环境.md`（两个发行版的用途与默认用户、NAT 网络现状与 virtioproxy 回退期存档、镜像源与 git 代理，以及 v1.13.3 与 ROS 2 桥接的版本差距）
 - 组会汇报工作区：`presentation/`（按场次组织，规范与场次索引见其 README；组会-1 的材料含可复用的证据索引与调研核查表）
 - 草稿收件箱：`inbox.md`（未整理内容暂存，整理后分流到 `.cs/`）
 
@@ -29,7 +30,7 @@
 - 想找装机/调参/QGC 教程与下载渠道：读 `.cs/notes/001-入门资源索引.md`
 - 想查官方文档原文：读 `.cs/notes/002-PX4本地文档查阅.md`
 - 想复现或扩展本机 SITL 仿真：读 `.cs/notes/004-PX4仿真SITL路径.md`
-- 想在 WSL 里跑 ROS1/ROS2，或遇到连 127.0.0.1 不通、下载失败：读 `.cs/notes/005-WSL-ROS环境.md`；要根治 WSL 网络，按 `.cs/issues/007-o-修复WSL-Windows层网络.md` 操作
+- 想在 WSL 里跑 ROS1/ROS2，或遇到连 127.0.0.1 不通、下载失败：读 `.cs/notes/005-WSL-ROS环境.md`（WSL 网络已于 2026-10-09 恢复 NAT，历史见 `.cs/issues/007-x-修复WSL-Windows层网络.md`）
 - 想暂存新资料：写 `inbox.md`，之后按约定分流
 
 ## 统一语言
@@ -48,7 +49,7 @@
 - 想找教程和资源链接：读 `.cs/notes/001-入门资源索引.md`
 - 想找本地已有的开源仓库/调研素材：读 `.cs/notes/003-references仓库索引.md` 与 `presentation/组会-1/research/sources.md`
 - 想做或改组会 PPT：读 `presentation/README.md`
-- 想看待办事项：读 `.cs/issues/`（当前进行中：007，WSL 的 Windows 层网络修复，待用户执行）
+- 想看待办事项：读 `.cs/issues/`（当前无进行中 issue；007 已于 2026-10-09 关闭）
 
 ## 当前边界
 
