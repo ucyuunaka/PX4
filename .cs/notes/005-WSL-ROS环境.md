@@ -1,12 +1,12 @@
 # 005 — WSL ROS 环境（Noetic + Humble）与网络
 
-> 2026-09-29 搭建，2026-09-30 按实机核对重写（纠正了初版中默认用户、`heading` 改名、Clash 可达、loopback 行为等错误说法）。
+> 2026-09-29 搭建，2026-09-30 按实机核对重写（纠正了初版中默认用户、`heading` 改名、Clash 可达、loopback 行为等错误说法）；2026-10-09 更新网络一节：WSL 已恢复 `nat`（issue 007-x 关闭）。
 > **定位**：WSL 目前是可用的开发环境，但**不一定是长期基座**——后续可能换到原生 Ubuntu，届时本 note 的网络部分基本作废，发行版/ROS/镜像部分仍可作装机清单参考。
 
 ## 结论
 
 - 两个 WSL2 发行版都在 U: 盘：`Ubuntu-20.04` 跑 ROS **Noetic**（ego-planner / Fast-Planner / Fast-Drone-250 / MASC 集群作业），`Ubuntu-22.04` 跑 ROS 2 **Humble**（px4_msgs / px4_ros_com / Micro-XRCE-DDS-Agent）。
-- **WSL 网络处于 `virtioproxy` 回退模式**（Windows 层 NAT 创建失败，镜像模式被判"不支持"；`.wslconfig` 救不了）。WSL 内部 UDP 走 127.0.0.1 默认不通，已用开机脚本对 PX4 相关端口打补丁；根治需管理员操作，见 issue 007（待用户执行）。
+- **WSL 网络已恢复 `nat` 模式**（2026-10-09）：根因是 Windows 防火墙服务 `mpssvc` 被禁用，HNS 建不了 WSL 的 NAT 网络；恢复服务并改为关闭防火墙配置文件后正常。过程见 `.cs/issues/007-x-修复WSL-Windows层网络.md`。回环补丁 `wsl-loopback-fix.sh` 在 NAT 下自动空转，保留安装。
 - 下载侧不开 Clash 即可用：apt/pip/ROS 走国内镜像，GitHub 走 `gh-proxy.com` 前缀。
 - 22.04 的 ROS 2 工具链对应 PX4 **v1.14+ 的 uXRCE-DDS 桥**，与项目基线 **v1.13.3 SITL 不对接**；要做 ROS 2 联调仿真需另编新版 SITL（见文末）。
 
@@ -15,7 +15,7 @@
 - 进 WSL 跑 ROS1/ROS2、PX4 SITL、MAVROS/MAVSDK、XRCE Agent 前
 - 本机程序连 `127.0.0.1` 连不上、UDP 收不到包
 - apt/pip/rosdep/git clone 拉不下来
-- Windows 网络修复（issue 007）或换原生 Ubuntu 之后回来改本 note
+- 换原生 Ubuntu、或 WSL 网络模式再变化之后回来改本 note
 
 ## 发行版一览
 
@@ -26,15 +26,18 @@
 
 两边的 ucy 都是 uid 1000、sudo 组、密码相同。进入：`wsl -d Ubuntu-20.04` / `wsl -d Ubuntu-22.04`。
 
-## 网络（2026-09-30 实测）
+## 网络
 
-### 现状：virtioproxy 回退模式
+### 现状：NAT（2026-10-09 起，实测）
 
-- 未写 `.wslconfig`，WSL 本应用 NAT；Windows 事件日志（应用程序日志，来源 `WSL`）显示**至少从 2026-09-27 起**每次启动都报"无法配置网络 (networkingMode Nat)，回退到 networkingMode VirtioProxy"。试 `networkingMode=mirrored` 则报"不支持镜像网络模式：Windows 版本 26100.7840 没有所需的功能"，再回退到同一模式（已还原，当前无 `.wslconfig`）。
-- 查看：`wslinfo --networking-mode` → `virtioproxy`。表现：Windows 侧没有 `vEthernet (WSL)` 网卡；WSL 的 `eth0` IP = 宿主 WLAN IP（当前 `192.168.209.154`，随 WiFi/DHCP 变化）；`ip rule` 有 pref 1 的 `ipproto tcp/udp lookup 127`，把发往 127.0.0.1 的流量经 `loopback0` 送到 Windows。
-- 所有发行版共用一个 VM 网络栈（含 docker-desktop），两个 Ubuntu 的 IP、路由规则相同。
+- `wslinfo --networking-mode` → `nat`（两个发行版同）。拓扑：Windows 侧有 `vEthernet (WSL (Hyper-V firewall))` 172.29.160.1/20；WSL `eth0` 172.29.171.4/20，默认网关 172.29.160.1 = Windows 侧 vEthernet 地址。**这套地址是动态的**（每次建网可能变），脚本里用 `ip route | awk '/default/{print $3}'` 现取网关、`hostname -I | awk '{print $1}'` 现取本机 IP，不要写死。
+- 回环完全正常：WSL 内部 TCP/UDP 连 127.0.0.1（含临时端口、任意绑定）都通，UDP 45999 与 TCP 临时端口均已实测。
+- **前提：Windows 防火墙服务 `mpssvc` 必须保持运行**。用户选择不要防火墙过滤，做法是关配置文件 `Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False`——**停服务会立刻回到 virtioproxy**（HNS 建网要靠它加防火墙规则）。
+- 所有发行版共用一个 VM 网络栈（含 docker-desktop），两个 Ubuntu 的 IP、路由相同。
 
-### 回环行为矩阵（未打补丁时）
+### 历史：virtioproxy 回退期（约 2026-09-27 ~ 2026-10-09）【已过时，仅存档】
+
+当时 mpssvc 被禁用 → HNS 建 NAT 失败（`0x800706D9`），每次启动回退到 virtioproxy；试 mirrored 报"不支持"（很可能同因）。表现：Windows 无 `vEthernet (WSL)` 网卡；`eth0` IP = 宿主 WLAN IP；`ip rule` 有 pref 1 的 `ipproto tcp/udp lookup 127`，把发往 127.0.0.1 的流量经 `loopback0` 送到 Windows。当时的回环行为矩阵（该模式下实测，NAT 下不适用）：
 
 | 场景 | 结果 |
 |---|---|
@@ -44,22 +47,21 @@
 | WSL 内部 UDP → 127.0.0.1（任何绑定） | **不通** |
 | WSL 内部 → eth0 IP，监听绑 `0.0.0.0` | TCP/UDP 都通 |
 
-初版"绑 `0.0.0.0` 就正常"的说法不对：连 127.0.0.1 的 UDP 与绑定地址无关，一律不通。
+当时为 PX4 相关 UDP 端口打了 `wsl-loopback-fix.sh` 开机补丁，并把 SITL↔Gazebo 的 TCP 4560 绕到 eth0 IP（见 ff 009）。
 
-### 已打的补丁：`wsl-loopback-fix.sh`
+### 补丁：`wsl-loopback-fix.sh`（NAT 下空转，保留）
 
-- 位置：两个发行版的 `/usr/local/sbin/wsl-loopback-fix.sh`（仓库副本 `.cs/env/wsl-loopback-fix.sh`），由 `/etc/wsl.conf` 的 `[boot] command = /usr/local/sbin/wsl-loopback-fix.sh` 在发行版启动时执行（异步，启动后 1–3 秒规则才出现）。
-- 作用：加 pref 0 规则，让发往 127.0.0.0/8 且端口为 **8888（XRCE）、14540–14549、14557、14580–14589（MAVROS/MAVSDK ↔ PX4 offboard 链路）** 的 UDP 留在 WSL 内部；其他 UDP 仍去 Windows（例如 PX4 → Windows QGC 的 14550）。没有 `lookup 127` 规则时（NAT/镜像模式）自动什么都不做。
-- 已验证：删规则 → 模拟收发失败 → `wsl --terminate` 重启发行版 → 规则自动恢复 → XRCE/MAVROS/MAVSDK 三组端口双向收发通过，对照端口仍不通；WSL→Windows 回环与 Docker 端口不受影响。
-- 新工具用了列表外的 UDP 端口：要么把端口加进脚本 `PORTS`，要么改用 eth0 IP（`hostname -I | awk '{print $1}'`）并让监听绑 `0.0.0.0`。
+- 位置：两个发行版的 `/usr/local/sbin/wsl-loopback-fix.sh`（仓库副本 `.cs/env/wsl-loopback-fix.sh`），由 `/etc/wsl.conf` 的 `[boot] command = /usr/local/sbin/wsl-loopback-fix.sh` 在发行版启动时执行。
+- 作用（virtioproxy 下才有意义）：加 pref 0 规则，让发往 127.0.0.0/8 且端口为 8888（XRCE）、14540–14549、14557、14580–14589（MAVROS/MAVSDK ↔ PX4 offboard 链路）的 UDP 留在 WSL 内部。
+- **NAT 下没有 `lookup 127` 规则，脚本自动什么都不做**（已验证 `ip rule` 只剩默认 3 条）。保留：若哪天再回退到 virtioproxy 它会自动生效；要删就连 `/etc/wsl.conf` 的 `[boot]` 段一起去掉。
 
-### 对各链路的影响
+### 对各链路的影响（NAT 下）
 
-- **ROS1**：节点用临时端口，必须 `ROS_IP=ROS_HOSTNAME=<eth0 IP>`、`ROS_MASTER_URI=http://<eth0 IP>:11311`。20.04 的 **root** `.bashrc` 已用 `hostname -I` 动态设置；**ucy 的 `.bashrc` 没有这几行**（已知遗留，要用 ucy 跑 ROS1 先补上）。
-- **PX4 v1.13.3 SITL ↔ Gazebo**：走固定端口 TCP 4560，按矩阵不受影响（推断；2026-09-30 未重跑 SITL）。
-- **MAVROS / MAVSDK / XRCE Agent**：补丁后按默认 127.0.0.1 配置可用（端口级验证，未带真实程序实跑）。
+- **ROS1**：`ROS_IP=ROS_HOSTNAME=<eth0 IP>`、`ROS_MASTER_URI=http://<eth0 IP>:11311` 在 NAT 下仍可用（节点用临时端口，走 eth0 IP 无回环问题），20.04 root `.bashrc` 的动态设置保留；**ucy 的 `.bashrc` 仍没有这几行**（已知遗留，要用 ucy 跑 ROS1 先补上）。
+- **PX4 v1.13.3 SITL ↔ Gazebo**：TCP 4560 走 127.0.0.1 直连正常——2026-10-09 复验，不带绕路环境变量时 `PX4 SIM HOST: localhost`、连接成功并完整起飞降落。启动器里的 `GAZEBO_IP`/`PX4_SIM_HOST_ADDR`（绕 eth0 IP）已不需要，NAT 下无害，保留。见 ff 009。
+- **MAVROS / MAVSDK / XRCE Agent**：127.0.0.1 的 UDP 默认就通，不再需要补丁（端口级验证，未带真实程序实跑）。
 - **ROS 2 DDS**：`demo_nodes_cpp talker` 能发布；listener 收包**未确认**（用户决定暂不继续验证）。
-- **Windows QGC 连 WSL 里的 SITL**：PX4 默认发往 127.0.0.1:14550，WSL→Windows UDP 通，理论上 QGC 直接可收（未实测）。
+- **Windows QGC 连 WSL 里的 SITL**：NAT 下 PX4 发往 127.0.0.1:14550 的 UDP 只留在 WSL 内部，**QGC 收不到**。候选：QGC 手动加 Comm Link（UDP）指向 WSL eth0 IP:14550；或让 PX4 的 mavlink 发到网关 IP；或设 `MAV_BROADCAST=1`。均**未实测**，详见 note 004 §五。
 
 ### DNS / IPv6 / 代理
 
@@ -117,8 +119,8 @@ MicroXRCEAgent udp4 -p 8888
 cd ~/ros2_ws && source /opt/ros/humble/setup.bash && colcon build --packages-select px4_msgs px4_ros_com
 
 # 网络自查
-wslinfo --networking-mode      # 期望 nat；当前 virtioproxy
-ip rule | grep 'lookup local'  # 应能看到 8888 / 14540-14549 等 pref 0 规则
+wslinfo --networking-mode      # 期望 nat（2026-10-09 已恢复）
+ip rule | grep 'lookup local'  # NAT 下无补丁加的 pref 0 规则属正常（补丁空转）
 ```
 
 - 非交互 shell（脚本、`wsl -- cmd`）不加载 `.bashrc` 末尾的 source 行，脚本里要显式 `source /opt/ros/<distro>/setup.bash`。
@@ -126,8 +128,9 @@ ip rule | grep 'lookup local'  # 应能看到 8888 / 14540-14549 等 pref 0 规�
 
 ## 相关位置
 
-- `.cs/issues/007-o-修复WSL-Windows层网络.md` — 根治 virtioproxy 的管理员操作指引（待用户执行）
-- `.cs/issues/008-x-ff-wsl-loopback-and-mirror-cleanup.md` — 本次核对与修补记录
+- `.cs/issues/007-x-修复WSL-Windows层网络.md` — virtioproxy→NAT 根治记录（2026-10-09 关闭）
+- `.cs/issues/009-x-ff-SITL-virtioproxy绕路与NAT恢复后复验.md` — SITL 4560 绕路与 NAT 复验
+- `.cs/issues/008-x-ff-wsl-loopback-and-mirror-cleanup.md` — 回环补丁与核对记录
 - `.cs/env/wsl-loopback-fix.sh` — 回环补丁脚本仓库副本
 - `.cs/notes/004-PX4仿真SITL路径.md` — v1.13.3 SITL 复现
 - `.cs/notes/003-references仓库索引.md` — px4_msgs / px4_ros_com / XRCE Agent 与基线的适配

@@ -35,11 +35,11 @@
 - WSLg 可用：`DISPLAY=:0`、`WAYLAND_DISPLAY=wayland-0` → Gazebo GUI 直接显示到 Windows 桌面，无需额外 X server。
 - 关键依赖：`gazebo11 + libgazebo11-dev`、cmake/ninja/gcc-9、openjdk-13+ant（jmavsim 备用）、`empy==3.3.4`（**必须钉 3.3.x**，4.x 删了 `em.RAW_OPT` 会让 mavlink 代码生成炸）。
 - 子模块走 `ghfast.top` 镜像（github 直连超时）。
-- **网络（2026-09-30 核对）**：WSL 目前运行在 virtioproxy 回退模式，WSL 内部 UDP 连 127.0.0.1 默认不通。PX4↔Gazebo 用的是固定端口 TCP 4560，不受影响；MAVROS/MAVSDK/XRCE 用的 UDP 端口已经由 `wsl-loopback-fix.sh` 补上。详见 note 005「网络」。
+- **网络（2026-10-09 核对）**：WSL 已恢复 `nat`，回环全通，PX4↔Gazebo 的 TCP 4560 走 127.0.0.1 直连正常。**更正**：virtioproxy 时期（约 2026-09-27~10-09）4560 其实**受影响**——连 127.0.0.1:4560 被 Windows 中转接受后丢弃、gazebo 内部回环临时端口 TCP 被拒，当时靠 `GAZEBO_IP`/`PX4_SIM_HOST_ADDR` 设为 eth0 IP 绕路才跑通（先前"4560 不受影响"的推断不成立）。绕路环境变量仍在启动器 `run_gazebo2.sh` 里，NAT 下无害。详见 note 005「网络」与 ff 009。
 
 ## 五、QGC 连通（两条候选，先通者为准）
 
-- (a) Windows `U:\expro\QGroundControl\bin\QGroundControl.exe`（v5.0.3）经 UDP 连 SITL。**当前是 virtioproxy 模式**，WSL 发往 127.0.0.1 的 UDP 会送到 Windows，而 PX4 默认发往 127.0.0.1:14550，所以 Windows 上的 QGC 理论上不用额外配置就能收到（未实测）。如果以后恢复成 NAT 模式（issue 007），就改成：SITL 端设 `MAV_BROADCAST=1`，或让 PX4 发往 Windows 宿主 IP，或在 QGC 里手动加一条指向 WSL IP:14550 的 Comm Link。
+- (a) Windows `U:\expro\QGroundControl\bin\QGroundControl.exe`（v5.0.3）经 UDP 连 SITL。**当前是 NAT 模式**（2026-10-09 起）：PX4 默认发往 127.0.0.1:14550 的 UDP 只留在 WSL 内部，Windows 上的 QGC 直接收不到。候选做法：在 QGC 里手动加一条 Comm Link（UDP）指向 WSL eth0 IP:14550（`hostname -I` 取 IP）；或 SITL 侧让 mavlink 发到默认网关 IP（`ip route | awk '/default/{print $3}'`，即 Windows 侧 vEthernet）；或设 `MAV_BROADCAST=1`。均**未实测**。
 - (b) WSL 内跑 QGC AppImage 走 WSLg。
 - 备注：本次闭环用 `pxh>` 内置控制台完成（无需 QGC 即可演示起飞-降落）；QGC 连通属"锦上添花"的可视化项，不阻塞结论。
 
@@ -70,11 +70,14 @@ commander land
 - `make` 的 stdin 不能是 `/dev/null`：pxh 读到 EOF 会 `Exiting NOW` 自杀。用 FIFO 或 `sleep infinity` 顶住写端。
 - WSL PATH 里混入 Windows Anaconda 的 `protobuf-config.cmake` 会污染 cmake → 用干净 `PATH`（`env PATH=/usr/local/sbin:...`）构建 sitl_gazebo。
 - `bash -lc` 里 `pkill px4` 会误杀自身；后台保活唯一可靠法是 `setsid … < /dev/null &`。
+- virtioproxy 时期（约 2026-09-27~10-09）：TCP 4560 连 127.0.0.1 被 Windows 中转丢弃，须 `GAZEBO_IP`+`PX4_SIM_HOST_ADDR`=eth0 IP 绕路；NAT 恢复后不再需要但保留无害。
+- 经 `wsl.exe bash -c '...'` 注入 pxh 命令时，串里的 `$VAR`/`for` 变量会被吞（实踩：批量循环发命令结果 pxh 只收到空行）。逐条用字面 `printf 'cmd\n' > pxh_in`，或先写脚本文件再执行。
 - 启动器与构建脚本：WSL `/root/px4-build/run_gazebo2.sh`（干净 PATH + FIFO stdin）、`build_sitl.sh`；仓库内备份在 `.cs/env/run_gazebo.sh`、`.cs/env/build_sitl.sh`。`.cs/env/setup_submodules.sh`、`install_deps.sh` 是早期版本，缺三个 bridge 子模块、嵌套 pymavlink 与 empy 钉版，脚本头已注明。
 - 更多排错细节（worktree `.git` 指针改写、rsync 后子模块 gitdir 修复、cmake 对 ExternalProject 目录的硬校验、empy 4.x 不兼容等）见根目录 `HANDOFF.md`「踩过的坑」。
 
 ## 状态
 
 - issue 004 已完成：确定结论"能跑，Gazebo Classic 11"并拿到闭环证据。
+- **2026-10-09 复验**（WSL 恢复 NAT 后）：headless（`HEADLESS=1`）起飞-降落-上锁闭环通过；不带 `GAZEBO_IP`/`PX4_SIM_HOST_ADDR` 的纯净启动也能跑通（`PX4 SIM HOST: localhost`），绕路不再需要。日志 `/root/px4-build/sitl_verify_nat.log` 与 `sitl_verify_nat_plain.log`，细节见 ff 009。
 - PPT 第 2、12 页使用本机实测截图/日志（标注"本机 SITL 实测，非实机"）。
 - 未做：QGC 连 SITL、多机 SITL（`Tools/gazebo_sitl_multiple_run.sh`）。
