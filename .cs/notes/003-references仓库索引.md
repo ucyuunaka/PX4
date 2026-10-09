@@ -25,7 +25,7 @@
 | | `ego-planner` | ZJU-FAST-Lab 无 ESDF 梯度局部规划器（~1ms）；自带 4 个演示 GIF |
 | | `ego-planner-swarm` | EGO-Planner 集群版：去中心化异步多机导航（ICRA2021）；自带 5 个集群演示 GIF |
 | | `mavsdk_drone_show` | MAVSDK-Python 多机 fleet ops（灯光秀轨迹回放/leader-follower/SITL）；自述 demo/beta |
-| **课程作业** | `MASC-2026-bonus-homework` | SYSU-HILAB 集群控制附加作业：在 ZJU-FAST-Lab **Swarm-Formation** 上做编队飞行仿真，依次变换 S/Y/S/U 队形并避障（`roslaunch ego_planner normal_hexagon.launch`）。**基于 ROS1 Noetic**（Dockerfile 用 `osrf/ros:noetic-desktop-full`）→ 在 WSL `Ubuntu-20.04` 上跑（见 note 005）。README 规定：不要改 `map_generator` 及其 launch 参数；需提交 `results/demo.gif` 和 `results/report.pdf`；提交前跑 `check_completeness.sh` |
+| **课程作业** | `MASC-2026-bonus-homework` | SYSU-HILAB 集群控制附加作业：在 ZJU-FAST-Lab **Swarm-Formation** 上做编队飞行仿真，依次变换 S/Y/S/U 队形并避障（`roslaunch ego_planner normal_hexagon.launch`）。**基于 ROS1 Noetic**（Dockerfile 用 `osrf/ros:noetic-desktop-full`）→ 在 WSL `Ubuntu-20.04` 上跑（见 note 005）。README 规定：不要改 `map_generator` 及其 launch 参数；需提交 `results/demo.gif` 和 `results/report.pdf`；提交前跑 `check_completeness.sh`。**注**：这是用户的本科课程作业模板，原样保留仅作参考项目——用户已毕业，README 里的提交规则对我们不再适用。`references/` 这份保持只读，要构建在 WSL 内副本里进行。 |
 
 ## 触发场景
 
