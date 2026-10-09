@@ -77,6 +77,22 @@ multi_wait_home() {
   return 1
 }
 
+# 每架各加一条发往 Windows QGC 的 GCS 链路（本地端口 14557+N 错开；不传 -m）。
+multi_gcs_links() {
+  local count="${1:-$MULTI_N}" gw n
+  gw=$(ip route | awk '/default/{print $3; exit}')
+  if [ -z "$gw" ]; then
+    say_err "没取到默认网关 IP，地面站连不上"
+    return 1
+  fi
+  say "正在给地面站加连接：$count 架飞机 → Windows（$gw:14550）…"
+  n=0
+  while [ "$n" -lt "$count" ]; do
+    px4i "$n" mavlink start -u $((14557+n)) -r 4000000 -t "$gw" -o 14550
+    n=$((n+1))
+  done
+}
+
 # multi_cleanup：杀掉多机后台实例与 gazebo，不清 QGC。
 # 多机 px4 命令行带 "-i <N>" 特征，只匹配它，碰不到 A/B 的 pxh 单机实例。
 multi_cleanup() {
