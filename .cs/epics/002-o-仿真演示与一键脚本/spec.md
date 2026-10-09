@@ -32,7 +32,9 @@ created: 2026-10-09
 - **调用链**：`.bat` 只负责 `wsl -d Ubuntu-20.04 -u root -- bash /mnt/u/ucy/Code/active/PX4/demos/<X>/run.sh`；所有逻辑写在仓库内 `.sh` 文件里（经 `wsl.exe bash -c` 传命令会吞 `$VAR`，见 note 004 §八）。
 - **演示体验**：双击 → 中文进度提示 → 仿真窗口出现 → 自动飞完一遍 → 窗口保留供讲解 → 按回车结束并清理。出问题双击「停止全部」后重来。
 - **展示内容的标注**：沿用 `presentation/README.md` 引用规则——本机仿真对外说"本机 SITL 实测，非实机"；D 说"规划算法仿真"，不说成 PX4 集群。
-- **已落地（2026-10-09）**：`demos/` 按上表建好：共用库 `lib/common.sh`（`sitl_start`/`wait_for`/`pxh`/`set_failsafe_params`/`gcs_link_to_windows`/`demo_cleanup`）+ `stop.sh`/`停止全部.bat`；A、B 两个演示均带 `.bat`、白话讲稿、README。QGC 链路做法：pxh `mavlink start -u 14557 -r 4000000 -t <默认网关IP> -o 14550`（不传 `-m`；网关运行时经 `ip route` 现取）；`.bat` 只在 QGC 未运行时启动它，停止脚本不动 QGC。
+- **已落地（2026-10-09）**：`demos/` 按上表建好：共用库 `lib/common.sh`（`sitl_start`/`wait_for`/`pxh`/`set_failsafe_params`/`gcs_link_to_windows`/`demo_cleanup`）+ `stop.sh`/`停止全部.bat`；A、B 两个演示均带 `.bat`、白话讲稿、README。QGC 链路做法：pxh `mavlink start -u 14557 -r 4000000 -t <默认网关IP> -o 14550`（不传 `-m`；网关运行时经 `ip route` 现取）；`.bat` 只在 QGC 未运行时启动它（`powershell Start-Process`，避免 QGC 日志落进黑窗口），停止脚本不动 QGC。
+- **已落地·C 多机（012-x）**：`lib/multi.sh`（`multi_start`/`multi_wait_home`/`px4i`/`multi_gcs_links`/`multi_cleanup`）——gzserver+empty.world + 每实例 `px4 -i N -d`（`build/px4_sitl_default/instance_N`）+ jinja 生成模型投放，飞行序列 `C-多机同飞/fly.py` 用 pymavlink（`udpin:14540+N`）。两个实测要点：下命令给后台实例用 `bin/px4-<module> --instance N`；`MAV_CMD_DO_REPOSITION` 经纬度是**十进制度数**且**必须持续发 MAVLink 心跳**（否则 PX4 `data_link_lost` 挂 failsafe 旗、reposition 被抑制）。
+- **已落地·D 编队（013-x）**：`lib/ros1.sh`（`ros_env`/`ros_cleanup`，含 `ROS_MASTER_URI=127.0.0.1` 与 `DISABLE_ROS1_EOL_WARNINGS=1`）；`/root/masc_ws` 副本编译（`catkin_make -j4` 2m14s）；`run_in_sim.launch:80` `flight_type` 3→2 用预设航点，等 drone_6 odom 首发后连发 3 次 `/traj_start_trigger`。
 
 ## 架构考量
 
@@ -63,22 +65,22 @@ created: 2026-10-09
 
 ## 当前推进
 
-### 可推进范围
+### 当前推进
 
-- A 单机起降：底座已验证（NAT 下 headless 起降闭环，ff 009），可直接实现。
-- B 的 QGC 连通方式：需先穿刺再实现。
+- A–D 四个演示**全部完成并用户双击实测通过（2026-10-09）**。epic 收尾还剩：断网彩排、备用录屏、组会-2 演示材料整合。
 
 ### Issues
 
 - [x] `.cs/issues/010-x-演示A单机起降一键脚本.md`：`demos/` 骨架 + 共用库 + 停止脚本 + A 演示；验证带 GUI 运行。
 - [x] `.cs/issues/011-x-演示B-QGC连通穿刺.md`：证明 Windows QGC 能与 WSL(NAT) 里的 SITL 双向通信，选定方案；之后在同一 issue 内加厚成 B 演示。
-- [ ] `.cs/issues/012-o-演示C多机同飞.md`：3 架 SITL 同飞 + QGC 多机显示。
-- [ ] D 编队避障：待 C 完成后建 issue。
+- [x] `.cs/issues/012-x-演示C多机同飞.md`：3 架 SITL 同飞 + QGC 多机显示。
+- [x] `.cs/issues/013-x-演示D编队避障.md`：Swarm-Formation 副本 + rviz 编队避障自动演示。
 
 ### 剩余阻碍
 
-- 断网实测：A/B 均未在断网状态下跑过（留给用户会前彩排；Gazebo 启动会尝试联网查模型库，QGC 离线地图为灰底）。
+- 断网实测：四个演示均未在断网状态下跑过（留给用户会前彩排；Gazebo 启动会尝试联网查模型库，QGC 离线地图为灰底）。
 - 备用录屏未做；组会现场投影未验证。
+- 组会-2 的演示材料整合（讲稿汇总、场次编排）未做。
 
 ## 暂不推进范围
 

@@ -81,4 +81,4 @@ commander land
 - **2026-10-09 复验**（WSL 恢复 NAT 后）：headless（`HEADLESS=1`）起飞-降落-上锁闭环通过；不带 `GAZEBO_IP`/`PX4_SIM_HOST_ADDR` 的纯净启动也能跑通（`PX4 SIM HOST: localhost`），绕路不再需要。日志 `/root/px4-build/sitl_verify_nat.log` 与 `sitl_verify_nat_plain.log`，细节见 ff 009。
 - PPT 第 2、12 页使用本机实测截图/日志（标注"本机 SITL 实测，非实机"）。
 - 已做（2026-10-09）：QGC 连 SITL（网关 IP 链路，issue 011-x；演示 B `demos/B-地面站联动/`）。
-- 未做：多机 SITL（进行中，issue 012；参考 `Tools/gazebo_sitl_multiple_run.sh`）。
+- 已做：多机 SITL（2026-10-09，issue 012-x）——自写启动（gzserver+empty.world、每实例 `px4 -i N -d`、`px4-<module> --instance N` 下命令、pymavlink 14540+N 监控+DO_REPOSITION 需十进制度数与持续心跳），实现见 `demos/lib/multi.sh`、`demos/C-多机同飞/`；参考 `Tools/gazebo_sitl_multiple_run.sh`。

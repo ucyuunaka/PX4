@@ -1,4 +1,4 @@
-# HANDOFF — 组会-1 已完成；WSL ROS 双环境（Noetic + Humble）已配好；WSL 网络已恢复 NAT（2026-10-09）；仿真演示 A/B 已可用（demos/）
+# HANDOFF — 组会-1 已完成；WSL ROS 双环境（Noetic + Humble）已配好；WSL 网络已恢复 NAT（2026-10-09）；仿真演示 A–D 已可用（demos/）
 
 写给一个没有上文的新会话。客观记录。最后更新 2026-10-09。
 
@@ -13,7 +13,7 @@
 - 组会工作线已全部关闭：epic `.cs/epics/001-x-组会PPT与PX4资料搜集/`（closed，毕业回写已做）与 issue 001–006（全部 `-x-`）。
 - **WSL 网络已根治（2026-10-09，issue `007-x` 关闭）**：根因是 Windows 防火墙服务 `mpssvc` 曾被禁用，HNS 建 NAT 失败使 WSL 自 2026-09-27 起回退 virtioproxy；恢复服务 + 关防火墙配置文件后回到 `nat`。**注意**：`mpssvc` 必须保持运行，要关防火墙只能关配置文件（`Set-NetFirewallProfile -Enabled False`）。NAT 下 SITL 已 headless 复验通过（`009-x-ff-SITL-virtioproxy绕路与NAT恢复后复验`）。Docker Desktop 重开后容器正常（已确认）。
 - WSL 不一定是长期基座，后续可能换原生 Ubuntu。
-- **仿真演示 A/B 已完成并用户实测通过（2026-10-09）**：`demos/` 下双击 `.bat` 即跑（A 单机起降、B QGC 地面站联动），白话说明 `demos/README.md`，讲稿在各演示目录 `说明.md`；对应 issue 010-x/011-x 已关闭。演示线隶属 epic `.cs/epics/002-o-仿真演示与一键脚本/`（进行中），下一步 C 多机同飞（issue 012），再之后 D 编队。
+- **仿真演示 A–D 全部完成并用户双击实测通过（2026-10-09）**：`demos/` 下双击 `.bat` 即跑（A 单机起降、B QGC 地面站联动、C 三机同飞、D 编队避障），白话说明 `demos/README.md`，讲稿在各演示目录 `说明.md`；对应 issue 010-x/011-x/012-x/013-x 全部关闭。演示线隶属 epic `.cs/epics/002-o-仿真演示与一键脚本/`（进行中），收尾剩断网彩排、备用录屏、组会-2 材料整合。
 - 下一阶段方向（部分已立项）：实物 bring-up（装机/刷机/校准/首飞，未立项）；后续组会（按 `presentation/README.md` 的场次规范新建 `组会-2/`；组会-2 计划现场演示 A+B）；Vision 正式整理（多机协同构想输入已备妥，见 epic 001 关闭回写）。
 
 ## 工作区结构

@@ -57,7 +57,7 @@
 
 ### 对各链路的影响（NAT 下）
 
-- **ROS1**：`ROS_IP=ROS_HOSTNAME=<eth0 IP>`、`ROS_MASTER_URI=http://<eth0 IP>:11311` 在 NAT 下仍可用（节点用临时端口，走 eth0 IP 无回环问题），20.04 root `.bashrc` 的动态设置保留；**ucy 的 `.bashrc` 仍没有这几行**（已知遗留，要用 ucy 跑 ROS1 先补上）。
+- **ROS1**：`ROS_IP=ROS_HOSTNAME=<eth0 IP>`、`ROS_MASTER_URI=http://<eth0 IP>:11311` 在 NAT 下仍可用（节点用临时端口，走 eth0 IP 无回环问题），20.04 root `.bashrc` 的动态设置保留；**ucy 的 `.bashrc` 仍没有这几行**（已知遗留，要用 ucy 跑 ROS1 先补上）。回环方式也已实测：`ROS_MASTER_URI=http://127.0.0.1:11311` + `ROS_IP=127.0.0.1` 的 ROS1 全链路（roslaunch/12 节点/rostopic）在 NAT 下正常——演示 D（Swarm-Formation，`/root/masc_ws`，issue 013-x，`demos/lib/ros1.sh`）即此用法；注意 rviz 启动会弹 ROS 1 EOL 对话框，用 `DISABLE_ROS1_EOL_WARNINGS=1` 抑制。
 - **PX4 v1.13.3 SITL ↔ Gazebo**：TCP 4560 走 127.0.0.1 直连正常——2026-10-09 复验，不带绕路环境变量时 `PX4 SIM HOST: localhost`、连接成功并完整起飞降落。启动器里的 `GAZEBO_IP`/`PX4_SIM_HOST_ADDR`（绕 eth0 IP）已不需要，NAT 下无害，保留。见 ff 009。
 - **MAVROS / MAVSDK / XRCE Agent**：127.0.0.1 的 UDP 默认就通，不再需要补丁（端口级验证，未带真实程序实跑）。
 - **ROS 2 DDS**：`demo_nodes_cpp talker` 能发布；listener 收包**未确认**（用户决定暂不继续验证）。
