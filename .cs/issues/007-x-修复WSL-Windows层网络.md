@@ -114,6 +114,6 @@ wsl --install --no-distribution
 
 **起效的修法**：`Set-Service`/`sc config` 改 mpssvc 被拒（服务 DACL 不给管理员组改配置，属正常保护），管理员改用 `reg add "HKLM\SYSTEM\CurrentControlSet\Services\mpssvc" /v Start /t REG_DWORD /d 2 /f` 恢复为自动启动 → 重启 → mpssvc Running → `Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False`（用户选择继续不要防火墙过滤；这是微软文档里关防火墙的正确姿势：关配置文件、保留服务运行，参考 configure-with-command-line 文档；microsoft/WSL#10709 也报告禁用防火墙会触发此问题）→ `wsl --shutdown` → 回 `nat`。
 
-**验证结果**：两个发行版 `nat`；Windows 出现 `vEthernet (WSL (Hyper-V firewall))` 172.29.160.1/20；WSL eth0 172.29.171.4/20，默认网关 172.29.160.1（与 HKCU Lxss `NatIpAddress` 一致）；两发行版 UDP 127.0.0.1:45999 回环测试打印 `(b'ok', ...)`，TCP 临时端口回环也通；`ip rule` 只剩默认 3 条（`wsl-loopback-fix.sh` 在 NAT 下自动空转，已验证，保留安装）；腾讯镜像与 gh-proxy.com 均 HTTP 200；resolv.conf 仍是 223.5.5.5 / 119.29.29.29。NAT 下 SITL 复验通过（见 ff 009）。Docker Desktop 恢复情况**未验证**（用户稍后自行重开）。
+**验证结果**：两个发行版 `nat`；Windows 出现 `vEthernet (WSL (Hyper-V firewall))` 172.29.160.1/20；WSL eth0 172.29.171.4/20，默认网关 172.29.160.1（与 HKCU Lxss `NatIpAddress` 一致）；两发行版 UDP 127.0.0.1:45999 回环测试打印 `(b'ok', ...)`，TCP 临时端口回环也通；`ip rule` 只剩默认 3 条（`wsl-loopback-fix.sh` 在 NAT 下自动空转，已验证，保留安装）；腾讯镜像与 gh-proxy.com 均 HTTP 200；resolv.conf 仍是 223.5.5.5 / 119.29.29.29。NAT 下 SITL 复验通过（见 ff 009）。Docker Desktop **已验证**：用户 2026-10-09 重开后容器均正常。
 
 **以后别再踩**：不要停止/禁用 `mpssvc`；要关防火墙就关配置文件（`Set-NetFirewallProfile ... -Enabled False`），服务必须保持运行。

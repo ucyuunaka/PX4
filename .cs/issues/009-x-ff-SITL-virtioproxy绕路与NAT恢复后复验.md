@@ -16,7 +16,7 @@ virtioproxy 时期查明 TCP 4560 连 127.0.0.1 会被 Windows 中转接受后�
 ## 改了哪些
 
 - WSL `/root/px4-build/run_gazebo2.sh` — 加 3 行绕路 env + 注释（NAT 恢复后注释改为"virtioproxy 需要、NAT 下无害保留"）。
-- WSL `/root/px4-build/run_gazebo_plain.sh` — 新增对照启动器（去掉绕路 env），验证用。
+- WSL `/root/px4-build/run_gazebo_plain.sh` — 临时对照启动器（去掉绕路 env），复验后即删除；对照日志保留在 `/root/px4-build/sitl_verify_nat_plain.log`。
 - `.cs/env/run_gazebo.sh` — 仓库副本，与 WSL 版同步。
 - `.cs/notes/004`、`005`、`.cs/issues/007-x`、`.cs/spec/index.md`、`HANDOFF.md` — 随 issue 007 关闭一并更新。
 

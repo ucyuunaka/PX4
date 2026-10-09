@@ -1,4 +1,4 @@
-# HANDOFF — 组会-1 已完成；WSL ROS 双环境（Noetic + Humble）已配好；WSL 网络已恢复 NAT（2026-10-09）
+# HANDOFF — 组会-1 已完成；WSL ROS 双环境（Noetic + Humble）已配好；WSL 网络已恢复 NAT（2026-10-09）；仿真演示 A/B 已可用（demos/）
 
 写给一个没有上文的新会话。客观记录。最后更新 2026-10-09。
 
@@ -11,9 +11,10 @@
 - **ROS 双环境已于 2026-09-29 配置完成并验证**：Ubuntu-20.04 + ROS Noetic（面向 ego-planner / Fast-Planner / Fast-Drone-250），Ubuntu-22.04 + ROS2 Humble（面向 px4_msgs / px4_ros_com / Micro-XRCE-DDS-Agent）。详见下文「WSL ROS 环境」节。
 - **第一次组会（2026-09-29）已讲完**：题目《基于 PX4 的 F450 四旋翼平台：前期调研、单机调试路线与多机扩展规划》，成品 `presentation/组会-1/组会-1.pptx`。
 - 组会工作线已全部关闭：epic `.cs/epics/001-x-组会PPT与PX4资料搜集/`（closed，毕业回写已做）与 issue 001–006（全部 `-x-`）。
-- **WSL 网络已根治（2026-10-09，issue `007-x` 关闭）**：根因是 Windows 防火墙服务 `mpssvc` 曾被禁用，HNS 建 NAT 失败使 WSL 自 2026-09-27 起回退 virtioproxy；恢复服务 + 关防火墙配置文件后回到 `nat`。**注意**：`mpssvc` 必须保持运行，要关防火墙只能关配置文件（`Set-NetFirewallProfile -Enabled False`）。NAT 下 SITL 已 headless 复验通过（`009-x-ff-SITL-virtioproxy绕路与NAT恢复后复验`）。Docker Desktop 恢复情况待用户重开确认。
+- **WSL 网络已根治（2026-10-09，issue `007-x` 关闭）**：根因是 Windows 防火墙服务 `mpssvc` 曾被禁用，HNS 建 NAT 失败使 WSL 自 2026-09-27 起回退 virtioproxy；恢复服务 + 关防火墙配置文件后回到 `nat`。**注意**：`mpssvc` 必须保持运行，要关防火墙只能关配置文件（`Set-NetFirewallProfile -Enabled False`）。NAT 下 SITL 已 headless 复验通过（`009-x-ff-SITL-virtioproxy绕路与NAT恢复后复验`）。Docker Desktop 重开后容器正常（已确认）。
 - WSL 不一定是长期基座，后续可能换原生 Ubuntu。
-- 下一阶段方向（均未立项，等用户发起）：实物 bring-up（装机/刷机/校准/首飞）；后续组会（按 `presentation/README.md` 的场次规范新建 `组会-2/`）；Vision 正式整理（多机协同构想输入已备妥，见 epic 001 关闭回写）。组会-2 计划做仿真现场演示：A 单机起降 / B QGC 联动 / C 多机 SITL / D MASC 编队，各配一键脚本——目前仅规划，尚未开始做。
+- **仿真演示 A/B 已完成并用户实测通过（2026-10-09）**：`demos/` 下双击 `.bat` 即跑（A 单机起降、B QGC 地面站联动），白话说明 `demos/README.md`，讲稿在各演示目录 `说明.md`；对应 issue 010-x/011-x 已关闭。演示线隶属 epic `.cs/epics/002-o-仿真演示与一键脚本/`（进行中），下一步 C 多机同飞（issue 012），再之后 D 编队。
+- 下一阶段方向（部分已立项）：实物 bring-up（装机/刷机/校准/首飞，未立项）；后续组会（按 `presentation/README.md` 的场次规范新建 `组会-2/`；组会-2 计划现场演示 A+B）；Vision 正式整理（多机协同构想输入已备妥，见 epic 001 关闭回写）。
 
 ## 工作区结构
 
